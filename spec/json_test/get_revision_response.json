@@ -1,0 +1,27 @@
+{
+    "continue": {
+      "rvcontinue": "20140409055517|119729739",
+      "continue": "||"
+    },
+    "query": {
+      "pages": {
+        "138": {
+          "pageid": 138,
+          "ns": 0,
+          "title": "Q42",
+          "revisions": [
+            {
+              "slots": {
+                "main": {
+                  "contentmodel": "wikibase-item",
+                  "contentformat": "application/json",
+                  "*": "{\"type\":\"item\",\"id\":\"Q42\",\"labels\":{\"en\":{\"language\":\"en\",\"value\":\"Douglas Adams\"}}}"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+  
