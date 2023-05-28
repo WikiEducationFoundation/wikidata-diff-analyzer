@@ -2,53 +2,27 @@
 # spec/wikidata/diff/analyzer_spec.rb
 
 require './lib/wikidata/diff/analyzer'
+require 'rspec'
 
-# unit test
-# uses a mock response saved in the spec/json_test directory
-
-RSpec.describe Wikidata::Diff::Analyzer do
-  describe '.get_revision_item_json' do
-    let(:item_id) { 'Q42' }  # Item ID of "Douglas Adams"
-    let(:revision_id) { '123456789' }  # Revision ID of the specific revision
-    let(:expected_json) do
-      {
-        'slots' => {
-          'main' => {
-            '*' => '{"type":"item","id":"Q42","labels":{"en":{"language":"en","value":"Douglas Adams"}}}',
-            'contentformat' => 'application/json',
-            'contentmodel' => 'wikibase-item'
-          }
-        }
-      }
-    end
-
-
-    before do
-      allow(URI).to receive(:open).and_return(File.open('spec/json_test/get_revision_response.json'))
-    end
-
-    it 'returns the JSON representation of the item for a specific revision' do
-      actual_json = described_class.get_revision_item_json(item_id, revision_id)
-      expect(actual_json).to eq(expected_json)
-      puts "Actual JSON: #{actual_json}"
-    end
-  end
-end
-
-# integration test
-# makes a real API request
-RSpec.describe Wikidata::Diff::Analyzer do
-  describe '.get_revision_item_json' do
-    let(:item_id) { 'Q42' }  # Item ID of "Douglas Adams"
-    let(:revision_id) { '123456789' }  # Revision ID of the specific revision
-  
-    it 'makes a real API request and returns the JSON representation of the item for a specific revision' do
-      actual_json = described_class.get_revision_item_json(item_id, revision_id)
-      # Perform assertions on the actual JSON response
-      expect(actual_json).to have_key('slots')
-      expect(actual_json['slots']['main']).to have_key('*')
-      # ... add more assertions as needed
-      puts "Actual JSON: #{actual_json}"
+# It is a testcase testing
+# https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=123456&rvslots=main&rvprop=content&format=json
+# only works with a valid revision id
+# only works having one revision object
+describe Wikidata::Diff::Analyzer do
+  describe '.get_revision_content' do
+    it 'returns the content of a revision' do
+      content = Wikidata::Diff::Analyzer.get_revision_content(123456)
+      # puts content.inspect
+      expect(content).to be_a(Hash)
+      expect(content['id']).to eq('Q1631')
+      expect(content['labels']).to be_a(Hash), "Expected 'labels' to be a Hash, but got #{content['labels'].inspect}"
+      expect(content['labels']['fr']['value']).to eq('Édith Piaf'), "Expected 'value' to be 'Édith Piaf', but got #{content['labels']['fr']['value'].inspect}"
+      expect(content['descriptions']).to be_a(Hash), "Expected 'descriptions' to be a Hash, but got #{content['descriptions'].inspect}"
+      expect(content['descriptions']['fr']['value']).to eq('Chanteuse française'), "Expected 'value' to be 'Chanteuse française', but got #{content['descriptions']['fr']['value'].inspect}"
+      expect(content['aliases']).to be_a(Array), "Expected 'aliases' to be an Array, but got #{content['aliases'].inspect}"
+      expect(content['claims']).to be_a(Array), "Expected 'claims' to be an Array, but got #{content['claims'].inspect}"
+      expect(content['sitelinks']).to be_a(Hash), "Expected 'sitelinks' to be a Hash, but got #{content['sitelinks'].inspect}"
+      expect(content['sitelinks']['frwiki']['title']).to eq('Édith Piaf'), "Expected 'title' to be 'Édith Piaf', but got #{content['sitelinks']['frwiki']['title'].inspect}"
     end
   end
 end
