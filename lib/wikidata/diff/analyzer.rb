@@ -67,10 +67,3 @@ module Wikidata
     end
   end
 end
-
-revision_id = 1596238100
-content = Wikidata::Diff::Analyzer.get_revision_content(revision_id)
-claim_count = Wikidata::Diff::Analyzer.count_claims(content)
-references_count = Wikidata::Diff::Analyzer.count_references_recursive(content)
-puts "Claim count: #{claim_count}"
-puts "References count: #{references_count}"
