@@ -4,15 +4,16 @@
 require './lib/wikidata/diff/analyzer'
 require 'rspec'
 
-# testcase testing get_revision_content
-# https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=123456&rvslots=main&rvprop=content&format=json
-# only works with a valid revision id
-# only works having one revision object
-RSpec.describe Wikidata::Diff::Analyzer do
+# testcases for get_revision_content
+
+# Individual Revision Id: 123456
+# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=123456&rvslots=main&rvprop=content&format=json
+# HTML: https://www.wikidata.org/w/index.php?diff=123456
+# this test case explores the structure of the JSON response to ensure that the content is being retrieved correctly
+ RSpec.describe WikidataDiffAnalyzer do
   describe '.get_revision_content' do
     it 'returns the content of a revision' do
-      content = Wikidata::Diff::Analyzer.get_revision_content(123456)
-      # puts content.inspect
+      content = WikidataDiffAnalyzer.get_revision_content(123456)
       expect(content).to be_a(Hash)
       expect(content['id']).to eq('Q1631')
       expect(content['labels']).to be_a(Hash), "Expected 'labels' to be a Hash, but got #{content['labels'].inspect}"
@@ -27,135 +28,185 @@ RSpec.describe Wikidata::Diff::Analyzer do
   end
 end
 
-# testcases for claim count
-RSpec.describe Wikidata::Diff::Analyzer do
+# testcases for claim count(Acutal API request)
+# Individual Revision Id: 1596238100
+# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1596238100&rvslots=main&rvprop=content&format=json
+# HTML: https://www.wikidata.org/w/index.php?diff=1596238100
+
+# parent id of the above revision id: 1596236983
+# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1596236983&rvslots=main&rvprop=content&format=json
+# HTML: https://www.wikidata.org/w/index.php?diff=1596236983
+RSpec.describe WikidataDiffAnalyzer do
   describe '.count_claims' do
+    # this test case expects the claim count to be 11 because the revision content has 11 claims in the API request
     it 'returns the number of claims in the revision content' do
-      revision_id = 1234567890
-      api_url = 'https://www.wikidata.org/w/api.php'
-    
-      client = instance_double(MediawikiApi::Client)
-      response = instance_double(MediawikiApi::Response)
-      allow(MediawikiApi::Client).to receive(:new).with(api_url).and_return(client)
-      allow(client).to receive(:action).with(
-        'query',
-        prop: 'revisions',
-        revids: revision_id,
-        rvslots: 'main',
-        rvprop: 'content',
-        format: 'json'
-      ).and_return(response)
-    
-      page_id = '123'
-      revisions = [
-        {
-          'slots' => {
-            'main' => {
-                '*' => '{"claims":{"P31":[{"mainsnak":{"snaktype":"value","property":"P31","hash":"ad7d38a03cdd40cdc373de0dc4e7b7fcbccb31d9","datavalue":{"value":{"entity-type":"item","numeric-id":5,"id":"Q5"},"type":"wikibase-entityid"}},"type":"statement","id":"Q111269579$480c779b-4c0e-f9a8-f670-a92ecc122c22","rank":"normal"}]}}'
+      revision_id = 1596238100
+      content = WikidataDiffAnalyzer.get_revision_content(revision_id)
+      expect(WikidataDiffAnalyzer.count_claims(content)).to eq(11)
+    end
+
+    it 'returns the number of claims in the revision content' do
+      revision_id = 1596236983
+      content = WikidataDiffAnalyzer.get_revision_content(revision_id)
+      expect(WikidataDiffAnalyzer.count_claims(content)).to eq(10)
+    end
+  end
+end
+
+# testcases for claim count (sanity check, not Actual API request)
+RSpec.describe 'count_claims' do
+  it 'returns 0 when content is nil' do
+    expect(WikidataDiffAnalyzer.count_claims(nil)).to eq(0)
+  end
+
+  it 'returns 0 when content is an empty hash' do
+    expect(WikidataDiffAnalyzer.count_claims({})).to eq(0)
+  end
+
+  it 'returns 0 when content has no claims' do
+    content = {
+      'foo' => 'bar'
+    }
+    expect(WikidataDiffAnalyzer.count_claims(content)).to eq(0)
+  end
+
+  it 'returns the correct count when content has claims' do
+    content = {
+      'claims' => {
+        'P123' => [
+          {
+            'mainsnak' => {
+              'snaktype' => 'value',
+              'property' => 'P123',
+              'datavalue' => {
+                'value' => 'foo',
+                'type' => 'string'
+              }
+            }
+          },
+          {
+            'mainsnak' => {
+              'snaktype' => 'value',
+              'property' => 'P123',
+              'datavalue' => {
+                'value' => 'bar',
+                'type' => 'string'
+              }
             }
           }
-        }
-      ]
-      allow(response).to receive(:data).and_return({
-        'pages' => {
-          page_id => {
-            'revisions' => revisions
+        ],
+        'P456' => [
+          {
+            'mainsnak' => {
+              'snaktype' => 'value',
+              'property' => 'P456',
+              'datavalue' => {
+                'value' => 'baz',
+                'type' => 'string'
+              }
+            }
           }
-        }
-      })
-    
-      content = Wikidata::Diff::Analyzer.get_revision_content(revision_id)
-      expect(Wikidata::Diff::Analyzer.count_claims(content)).to eq(1)
-    end
-
-    it 'returns 0 if the revision content has no claims' do
-      content = {
-        'foo' => 'bar'
+        ]
       }
-      expect(Wikidata::Diff::Analyzer.count_claims(content)).to eq(0)
-    end
+    }
+    expect(WikidataDiffAnalyzer.count_claims(content)).to eq(3)
   end
 end
 
-# test cases for count_references_recursive
+
+# test cases for count_references (Actual API request)
+# Individual Revision Id: 1596238100
+# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1596238100&rvslots=main&rvprop=content&format=json
+# HTML: https://www.wikidata.org/w/index.php?diff=1596238100
+
+# parent id of the above revision id: 1596236983
+# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1596236983&rvslots=main&rvprop=content&format=json
+# HTML: https://www.wikidata.org/w/index.php?diff=1596236983
 RSpec.describe '.count_references' do
+  # this test case expects the reference count to be 4 because the revision content has 4 references in the API request
   it 'returns the number of references in the revision content' do
-    revision_id = 1234567890
-    api_url = 'https://www.wikidata.org/w/api.php'
-
-    client = instance_double(MediawikiApi::Client)
-    response = instance_double(MediawikiApi::Response)
-    allow(MediawikiApi::Client).to receive(:new).with(api_url).and_return(client)
-    allow(client).to receive(:action).with(
-      'query',
-      prop: 'revisions',
-      revids: revision_id,
-      rvslots: 'main',
-      rvprop: 'content',
-      format: 'json'
-    ).and_return(response)
-
-    page_id = '123'
-    revisions = [
-      {
-        'slots' => {
-          'main' => {
-            '*' => '{"claims":{"P31":[{"mainsnak":{"snaktype":"value","property":"P31","hash":"ad7d38a03cdd40cdc373de0dc4e7b7fcbccb31d9","datavalue":{"value":{"entity-type":"item","numeric-id":5,"id":"Q5"},"type":"wikibase-entityid"}},"type":"statement","id":"Q111269579$480c779b-4c0e-f9a8-f670-a92ecc122c22","rank":"normal","references":[{"hash":"d8d7d6d5d4d3d2d1d0","snaks":{"P248":[{"snaktype":"value","property":"P248","hash":"a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0","datavalue":{"value":{"entity-type":"item","numeric-id":36906466,"id":"Q36906466"},"type":"wikibase-entityid"}}]},"snaks-order":["P248"]}]}]}}'
-          }
-        }
-      }
-    ]
-    allow(response).to receive(:data).and_return({
-      'pages' => {
-        page_id => {
-          'revisions' => revisions
-        }
-      }
-    })
-
-    content = Wikidata::Diff::Analyzer.get_revision_content(revision_id)
-    expect(Wikidata::Diff::Analyzer.count_references_recursive(content)).to eq(1)
+    revision_id = 1596238100
+    content = WikidataDiffAnalyzer.get_revision_content(revision_id)
+    expect(WikidataDiffAnalyzer.count_references(content)).to eq(4)
+  end
+  it 'returns the number of references in the revision content' do
+    revision_id = 1596236983
+    content = WikidataDiffAnalyzer.get_revision_content(revision_id)
+    expect(WikidataDiffAnalyzer.count_references(content)).to eq(3)
   end
 end
 
-# test cases for count_references_recursive when references count is zero
-RSpec.describe '.count_references' do
-  it 'returns the number of references in the revision content' do
-    revision_id = 1234567890
-    api_url = 'https://www.wikidata.org/w/api.php'
+# test cases for count_references (sanity check, not Actual API request)
+RSpec.describe 'count_references' do
+  it 'returns 0 when content is nil' do
+    expect(WikidataDiffAnalyzer.count_references(nil)).to eq(0)
+  end
 
-    client = instance_double(MediawikiApi::Client)
-    response = instance_double(MediawikiApi::Response)
-    allow(MediawikiApi::Client).to receive(:new).with(api_url).and_return(client)
-    allow(client).to receive(:action).with(
-      'query',
-      prop: 'revisions',
-      revids: revision_id,
-      rvslots: 'main',
-      rvprop: 'content',
-      format: 'json'
-    ).and_return(response)
+  it 'returns 0 when content is an empty hash' do
+    expect(WikidataDiffAnalyzer.count_references({})).to eq(0)
+  end
 
-    page_id = '123'
-    revisions = [
-      {
-        'slots' => {
-          'main' => {
-            '*' => '{"claims":{}}'
+  it 'returns 0 when content has no claims' do
+    content = {
+      'foo' => 'bar'
+    }
+    expect(WikidataDiffAnalyzer.count_references(content)).to eq(0)
+  end
+
+  it 'returns 0 when content has claims but no references' do
+    content = {
+      'claims' => {
+        'P123' => [
+          {
+            'mainsnak' => {
+              'snaktype' => 'value',
+              'property' => 'P123',
+              'datavalue' => {
+                'value' => 'foo',
+                'type' => 'string'
+              }
+            }
           }
-        }
+        ]
       }
-    ]
-    allow(response).to receive(:data).and_return({
-      'pages' => {
-        page_id => {
-          'revisions' => revisions
-        }
-      }
-    })
+    }
+    expect(WikidataDiffAnalyzer.count_references(content)).to eq(0)
+  end
 
-    content = Wikidata::Diff::Analyzer.get_revision_content(revision_id)
-    expect(Wikidata::Diff::Analyzer.count_references_recursive(content)).to eq(0)
+  it 'returns the correct number of references when content has claims with references' do
+    content = {
+      'claims' => {
+        'P123' => [
+          {
+            'mainsnak' => {
+              'snaktype' => 'value',
+              'property' => 'P123',
+              'datavalue' => {
+                'value' => 'foo',
+                'type' => 'string'
+              }
+            },
+            'references' => [
+              {
+                'snaks' => {
+                  'P456' => [
+                    {
+                      'snaktype' => 'value',
+                      'property' => 'P456',
+                      'datavalue' => {
+                        'value' => 'bar',
+                        'type' => 'string'
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+    expect(WikidataDiffAnalyzer.count_references(content)).to eq(1)
   end
 end
 
