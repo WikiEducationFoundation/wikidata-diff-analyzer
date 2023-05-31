@@ -107,7 +107,7 @@ module WikidataDiffAnalyzer
 
 
     return 0 if content.nil?
-    
+
     claims = content['claims']
     return 0 unless claims.is_a?(Hash)
   
@@ -127,7 +127,19 @@ module WikidataDiffAnalyzer
         end
       end
     end
-  
     references_count
-  end    
+  end  
+  
+  # Gets the parent id based on current revision id from the action:compare at Wikidata API.
+  def self.get_parent_id(current_revision_id)
+    client = MediawikiApi::Client.new('https://www.wikidata.org/w/api.php')
+    response = client.action('compare', fromrev: current_revision_id, torelative: 'prev', format: 'json')
+    data = response.data
+    if data
+      parent_id = data['fromrevid']
+      return parent_id
+    else
+      return nil
+    end
+  end
 end

@@ -210,3 +210,41 @@ RSpec.describe 'count_references' do
   end
 end
 
+# test cases for get_parent_id (Actual API request)
+RSpec.describe 'get_parent_id' do
+  describe '#get_parent_id' do
+  # Individual Revision Id: 1596238100
+  # parent id of the above revision id: 1596236983
+
+  # JSON: https://www.wikidata.org/w/api.php?action=compare&fromrev=1596238100&torelative=prev&format=json
+  # HTML: https://www.wikidata.org/w/index.php?title=Q111269579&diff=1596238100&oldid=1596236983
+    it 'returns the ID of the parent revision' do
+      # based on https://www.wikidata.org/w/index.php?title=Q111269579&diff=1596238100&oldid=1596236983
+      # I know the parent id of this revision 
+      # but have to brainstorm idea for other cases
+      current_revision_id = 1596238100
+      expected_parent_id = 1596236983
+
+      parent_id = WikidataDiffAnalyzer.get_parent_id(current_revision_id)
+
+      expect(parent_id).to eq(expected_parent_id)
+    end
+
+  # Individual Revision Id: 123
+  # parent id of the above revision id: none
+
+  # JSON: https://www.wikidata.org/w/api.php?action=compare&fromrev=123&torelative=prev&format=json
+  # (returns a warning that there's no previous revision)
+  # HTML: https://www.wikidata.org/w/index.php?title=Q111269579&diff=123
+
+    it 'returns nil if the current revision is the first revision' do
+      # for sure there's no parent revision for this based on API response
+      # https://www.wikidata.org/w/api.php?action=compare&fromrev=123&torelative=prev&format=json
+      current_revision_id = 123
+      parent_id = WikidataDiffAnalyzer.get_parent_id(current_revision_id)
+      expect(parent_id).to be_nil
+    end
+  end
+end
+
+
