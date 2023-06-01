@@ -210,6 +210,28 @@ RSpec.describe 'count_references' do
   end
 end
 
+# test cases for count_qualifiers(Actual API request)
+# Individual Revision Id: 1596238100
+# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1596238100&rvslots=main&rvprop=content&format=json
+# HTML: https://www.wikidata.org/w/index.php?diff=1596238100
+
+# parent id of the above revision id: 1596236983
+# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1596236983&rvslots=main&rvprop=content&format=json
+# HTML: https://www.wikidata.org/w/index.php?diff=1596236983
+RSpec.describe '.count_qualifiers' do
+  # this test case expects the reference count to be 4 because the revision content has 4 references in the API request
+  it 'returns the number of qualifiers in the revision content' do
+    revision_id = 1596238100
+    content = WikidataDiffAnalyzer.get_revision_content(revision_id)
+    expect(WikidataDiffAnalyzer.count_qualifiers(content)).to eq(3)
+  end
+  it 'returns the number of qualifiers in the revision content' do
+    revision_id = 1596236983
+    content = WikidataDiffAnalyzer.get_revision_content(revision_id)
+    expect(WikidataDiffAnalyzer.count_qualifiers(content)).to eq(1)
+  end
+end
+
 # test cases for get_parent_id (Actual API request)
 RSpec.describe 'get_parent_id' do
   describe '#get_parent_id' do
@@ -252,9 +274,10 @@ RSpec.describe 'calculate_diff' do
   it 'returns the correct claim and reference diff' do
     diff = WikidataDiffAnalyzer.calculate_diff(1596238100)
     # based on the HTML https://www.wikidata.org/w/index.php?title=Q111269579&diff=1596238100&oldid=1596236983
-    # the diff is 1 claim and 1 reference
+    # the diff is 1 claim, 1 reference and 2 qualifiers
     expect(diff[:claim_diff]).to eq(1)
     expect(diff[:reference_diff]).to eq(1)
+    expect(diff[:qualifier_diff]).to eq(2)
   end
 end
 
