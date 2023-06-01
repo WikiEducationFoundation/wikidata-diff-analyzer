@@ -142,4 +142,30 @@ module WikidataDiffAnalyzer
       return nil
     end
   end
+
+  # calculates the difference between two revisions based on the revision ids.
+  def self.calculate_diff(current_revision_id)
+    # get the parent revision id
+    parent_revision_id = get_parent_id(current_revision_id)
+    
+    # current claim and reference count
+    current_content = get_revision_content(current_revision_id)
+    current_claim_count = count_claims(current_content)
+    current_reference_count = count_references(current_content)
+
+    # parent claim and reference count
+    parent_content = get_revision_content(parent_revision_id)
+    parent_claim_count = count_claims(parent_content)
+    parent_reference_count = count_references(parent_content)
+
+    # calculate the difference
+    claim_diff = current_claim_count - parent_claim_count
+    reference_diff = current_reference_count - parent_reference_count
+
+    # return the difference
+    return {
+      claim_diff: claim_diff,
+      reference_diff: reference_diff
+    }
+  end
 end

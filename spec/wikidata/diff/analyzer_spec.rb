@@ -247,4 +247,15 @@ RSpec.describe 'get_parent_id' do
   end
 end
 
+# test cases for calculate_diff
+RSpec.describe 'calculate_diff' do
+  it 'returns the correct claim and reference diff' do
+    diff = WikidataDiffAnalyzer.calculate_diff(1596238100)
+    # based on the HTML https://www.wikidata.org/w/index.php?title=Q111269579&diff=1596238100&oldid=1596236983
+    # the diff is 1 claim and 1 reference
+    expect(diff[:claim_diff]).to eq(1)
+    expect(diff[:reference_diff]).to eq(1)
+  end
+end
+
 
