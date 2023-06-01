@@ -129,6 +129,33 @@ module WikidataDiffAnalyzer
     end
     references_count
   end  
+
+  # counts the total number of qualifiers in the claims of the provided content.
+  # reference was an array whereas qualifier is a hash
+  def self.count_qualifiers(content)
+    return 0 if content.nil?
+
+    claims = content['claims']
+    return 0 unless claims.is_a?(Hash)
+
+    qualifiers_count = 0
+
+    # Iterate over the values of the claims hash
+    claims.values.each do |values|
+      # Check if values is an array
+      if values.is_a?(Array)
+        # Iterate over each value
+        values.each do |value|
+          # Check if the value has qualifiers and if qualifiers is a hash
+          if value.key?('qualifiers') && value['qualifiers'].is_a?(Hash)
+            # Increment the qualifiers count by the length of each array inside the hash
+            qualifiers_count += value['qualifiers'].map { |key, value| value.length }.reduce(0) { |sum, length| sum + length }
+          end
+        end
+      end
+    end
+    return qualifiers_count
+  end
   
   # Gets the parent id based on current revision id from the action:compare at Wikidata API.
   def self.get_parent_id(current_revision_id)
@@ -147,25 +174,29 @@ module WikidataDiffAnalyzer
   def self.calculate_diff(current_revision_id)
     # get the parent revision id
     parent_revision_id = get_parent_id(current_revision_id)
-    
-    # current claim and reference count
+
+    # current claim, reference and qualifier count
     current_content = get_revision_content(current_revision_id)
     current_claim_count = count_claims(current_content)
     current_reference_count = count_references(current_content)
+    current_qualifier_count = count_qualifiers(current_content)
 
-    # parent claim and reference count
+    # parent claim, reference and qualifier count
     parent_content = get_revision_content(parent_revision_id)
     parent_claim_count = count_claims(parent_content)
     parent_reference_count = count_references(parent_content)
+    parent_qualifier_count = count_qualifiers(parent_content)
 
     # calculate the difference
     claim_diff = current_claim_count - parent_claim_count
     reference_diff = current_reference_count - parent_reference_count
+    qualifier_diff = current_qualifier_count - parent_qualifier_count
 
     # return the difference
     return {
       claim_diff: claim_diff,
-      reference_diff: reference_diff
+      reference_diff: reference_diff,
+      qualifier_diff: qualifier_diff
     }
   end
 end
