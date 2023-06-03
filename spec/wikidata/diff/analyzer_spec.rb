@@ -269,6 +269,26 @@ RSpec.describe 'get_parent_id' do
   end
 end
 
+# test cases for get_child_id (Actual API request)
+RSpec.describe 'get_child_id' do
+  describe '#get_child_id' do
+  # parent id of the above revision id: 1596236983
+  # Child Revision Id: 1596238100
+
+  # JSON: https://www.wikidata.org/w/api.php?action=compare&fromrev=1596236983&torelative=next&format=json
+  # HTML: https://www.wikidata.org/w/index.php?title=Q111269579&diff=1596238100&oldid=1596236983
+    it 'returns the ID of the parent revision' do
+      # based on https://www.wikidata.org/w/index.php?title=Q111269579&diff=1596238100&oldid=1596236983
+      parent_revision_id = 1596236983
+      expected_child_id = 1596238100
+
+      child_id = WikidataDiffAnalyzer.get_child_id(parent_revision_id)
+
+      expect(child_id).to eq(expected_child_id)
+    end
+  end
+end
+
 # test cases for calculate_diff
 RSpec.describe 'calculate_diff' do
   it 'returns the correct claim and reference diff' do

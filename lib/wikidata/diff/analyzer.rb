@@ -170,6 +170,19 @@ module WikidataDiffAnalyzer
     end
   end
 
+  # Gets the child id based on parent revision id from the action:compare at Wikidata API.
+  def self.get_child_id(parent_revision_id)
+    client = MediawikiApi::Client.new('https://www.wikidata.org/w/api.php')
+    response = client.action('compare', fromrev: parent_revision_id, torelative: 'next', format: 'json')
+    data = response.data
+    if data
+      child_id = data['torevid']
+      return child_id
+    else
+      return nil
+    end
+  end
+
   # calculates the difference between two revisions based on the revision ids.
   def self.calculate_diff(current_revision_id)
     # get the parent revision id
