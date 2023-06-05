@@ -232,6 +232,31 @@ RSpec.describe '.count_qualifiers' do
   end
 end
 
+ # test cases for count_statements
+ RSpec.describe 'count_statements' do
+  # HTML: https://www.wikidata.org/w/index.php?title=Q111269579&diff=1596238100&oldid=1596236983
+  # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1596238100&rvslots=main&rvprop=content&format=json
+  it 'returns the number of statements in the revision content' do
+    revision_id = 1596238100
+    content = WikidataDiffAnalyzer.get_revision_content(revision_id)
+    expect(WikidataDiffAnalyzer.count_statements(content)).to eq(11)
+  end
+  it 'returns the number of statements in the revision content' do
+    revision_id = 1596236983
+    content = WikidataDiffAnalyzer.get_revision_content(revision_id)
+    expect(WikidataDiffAnalyzer.count_statements(content)).to eq(10)
+  end
+  # HTML: https://www.wikidata.org/w/index.php?title=Q111269579&diff=1880197464&oldid=1895908644
+  # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1880197464&rvslots=main&rvprop=content&format=json
+  it 'returns the count of statements' do
+    parent_content = WikidataDiffAnalyzer.get_revision_content(1880197464)
+    expect(WikidataDiffAnalyzer.count_statements(parent_content)).to eq(107)
+    content = WikidataDiffAnalyzer.get_revision_content(1895908644)
+    expect(WikidataDiffAnalyzer.count_statements(content)).to eq(110)
+  end
+end
+
+
 # test cases for get_parent_id (Actual API request)
 RSpec.describe 'get_parent_id' do
   describe '#get_parent_id' do
@@ -315,18 +340,18 @@ end
       expect(diff[:qualifier_diff]).to eq(0)
     end
 
-    # # does not pass currently
-    # it 'returns the correct difference for creating a statement with open refine' do
-    # # HTML: https://www.wikidata.org/w/index.php?title=Q597236&oldid=1895908644
-    # # HTML: https://www.wikidata.org/w/index.php?title=Q111269579&diff=1895908644&oldid=1880197464
-    # # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1895908644&rvslots=main&rvprop=content&format=json
-    #   revision_id = 1895908644
-    #   diff = WikidataDiffAnalyzer.calculate_diff(revision_id)
+    # does not pass currently
+    it 'returns the correct difference for creating a statement with open refine' do
+    # HTML: https://www.wikidata.org/w/index.php?title=Q597236&oldid=1895908644
+    # HTML: https://www.wikidata.org/w/index.php?title=Q111269579&diff=1895908644&oldid=1880197464
+    # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1895908644&rvslots=main&rvprop=content&format=json
+      revision_id = 1895908644
+      diff = WikidataDiffAnalyzer.calculate_diff(revision_id)
 
-    #   expect(diff[:claim_diff]).to eq(1)
-    #   expect(diff[:reference_diff]).to eq(0)
-    #   expect(diff[:qualifier_diff]).to eq(0)
-    # end
+      expect(diff[:claim_diff]).to eq(3)
+      expect(diff[:reference_diff]).to eq(3)
+      expect(diff[:qualifier_diff]).to eq(3)
+    end
 
     it 'returns the correct difference for creating a new claim with mix\'n\'match' do
       # HTML: https://www.wikidata.org/w/index.php?title=Q111269579&diff=622872009&oldid=620411938
@@ -396,5 +421,4 @@ end
       expect(diff[:qualifier_diff]).to eq(0)
     end
 end
-
 
