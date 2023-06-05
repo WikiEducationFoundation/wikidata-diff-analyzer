@@ -294,6 +294,7 @@ RSpec.describe 'calculate_diff' do
   it 'returns the correct claim and reference diff' do
     diff = WikidataDiffAnalyzer.calculate_diff(1596238100)
     # based on the HTML https://www.wikidata.org/w/index.php?title=Q111269579&diff=1596238100&oldid=1596236983
+    # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1596238100&rvslots=main&rvprop=content&format=json
     # the diff is 1 claim, 1 reference and 2 qualifiers
     expect(diff[:claim_diff]).to eq(1)
     expect(diff[:reference_diff]).to eq(1)
@@ -328,7 +329,7 @@ end
     # end
 
     it 'returns the correct difference for creating a new claim with mix\'n\'match' do
-      # HTML: https://www.wikidata.org/w/index.php?title=Q597236&oldid=622872009
+      # HTML: https://www.wikidata.org/w/index.php?title=Q111269579&diff=622872009&oldid=620411938
       # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=622872009&rvslots=main&rvprop=content&format=json
       revision_id = 622872009
       diff = WikidataDiffAnalyzer.calculate_diff(revision_id)
@@ -339,7 +340,7 @@ end
     end
 
     it 'returns the correct difference for creating a new claim with recoin' do
-      # HTML: https://www.wikidata.org/w/index.php?title=Q118592380&oldid=1901195499
+      # HTML: https://www.wikidata.org/w/index.php?title=Q111269579&diff=1901195499&oldid=1901195083
       # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1901195499&rvslots=main&rvprop=content&format=json
       revision_id = 1901195499
       diff = WikidataDiffAnalyzer.calculate_diff(revision_id)
@@ -350,7 +351,7 @@ end
     end
 
     it 'returns the correct difference for removing a claim (statement)' do
-      # HTML: https://www.wikidata.org/w/index.php?title=Q597236&oldid=1902995129
+      # HTML: https://www.wikidata.org/w/index.php?title=Q111269579&diff=1903003546&oldid=1903003539
       # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1902995129&rvslots=main&rvprop=content&format=json
       revision_id = 1902995129
       diff = WikidataDiffAnalyzer.calculate_diff(revision_id)
@@ -363,7 +364,7 @@ end
     end
 
     it 'returns the correct difference for adding a qualifier to a claim (statement)' do
-      # HTML: https://www.wikidata.org/w/index.php?title=Q597236&oldid=1903003546
+      # HTML: https://www.wikidata.org/w/index.php?title=Q597236&diff=1902995129&oldid=1900775402
       # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1903003546&rvslots=main&rvprop=content&format=json
       revision_id = 1903003546
       diff = WikidataDiffAnalyzer.calculate_diff(revision_id)
@@ -374,7 +375,7 @@ end
     end
 
     it 'returns the correct difference for adding a reference to a claim' do
-      # HTML: https://www.wikidata.org/w/index.php?title=Q597236&oldid=1863882476
+      # HTML: https://www.wikidata.org/w/index.php?title=Q111269579&diff=1863882476&oldid=1863882469
       # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1863882476&rvslots=main&rvprop=content&format=json
       revision_id = 1863882476
       diff = WikidataDiffAnalyzer.calculate_diff(revision_id)
@@ -385,7 +386,7 @@ end
     end
 
     it 'returns the correct difference for adding a reference to a claim using quickstatements' do
-      # HTML: https://www.wikidata.org/w/index.php?title=Q597236&oldid=535078533
+      # HTML: https://www.wikidata.org/w/index.php?title=Q111269579&diff=535078533&oldid=535078524
       # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=535078533&rvslots=main&rvprop=content&format=json
       revision_id = 535078533
       diff = WikidataDiffAnalyzer.calculate_diff(revision_id)
