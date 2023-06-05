@@ -301,4 +301,90 @@ RSpec.describe 'calculate_diff' do
   end
 end
 
+# more test cases for calculate diff
+  RSpec.describe '.calculate_diff' do
+    # HTML: https://www.wikidata.org/w/index.php?title=Q597236&oldid=1898156691
+    it 'returns the correct difference for creating a new claim (statement)' do
+      revision_id = 1898156691
+      diff = WikidataDiffAnalyzer.calculate_diff(revision_id)
+
+      expect(diff[:claim_diff]).to eq(1)
+      expect(diff[:reference_diff]).to eq(0)
+      expect(diff[:qualifier_diff]).to eq(0)
+    end
+
+    # # does not pass currently
+    # it 'returns the correct difference for creating a statement with open refine' do
+    # # HTML: https://www.wikidata.org/w/index.php?title=Q597236&oldid=1895908644
+    #   revision_id = 1895908644
+    #   diff = WikidataDiffAnalyzer.calculate_diff(revision_id)
+
+    #   expect(diff[:claim_diff]).to eq(1)
+    #   expect(diff[:reference_diff]).to eq(0)
+    #   expect(diff[:qualifier_diff]).to eq(0)
+    # end
+
+    it 'returns the correct difference for creating a new claim with mix\'n\'match' do
+      # HTML: https://www.wikidata.org/w/index.php?title=Q597236&oldid=622872009
+      revision_id = 622872009
+      diff = WikidataDiffAnalyzer.calculate_diff(revision_id)
+
+      expect(diff[:claim_diff]).to eq(1)
+      expect(diff[:reference_diff]).to eq(0)
+      expect(diff[:qualifier_diff]).to eq(0)
+    end
+
+    it 'returns the correct difference for creating a new claim with recoin' do
+      # HTML: https://www.wikidata.org/w/index.php?title=Q118592380&oldid=1901195499
+      revision_id = 1901195499
+      diff = WikidataDiffAnalyzer.calculate_diff(revision_id)
+
+      expect(diff[:claim_diff]).to eq(1)
+      expect(diff[:reference_diff]).to eq(0)
+      expect(diff[:qualifier_diff]).to eq(0)
+    end
+
+    it 'returns the correct difference for removing a claim (statement)' do
+      # HTML: https://www.wikidata.org/w/index.php?title=Q597236&oldid=1902995129
+      revision_id = 1902995129
+      diff = WikidataDiffAnalyzer.calculate_diff(revision_id)
+
+      expect(diff[:claim_diff]).to eq(-1)
+      # when the claim is removed, all the references and qualifiers in that claim are removed as well
+      # currently, the count is general and not specific to the claim - but it's fine for now
+      expect(diff[:reference_diff]).to eq(-1)
+      expect(diff[:qualifier_diff]).to eq(0)
+    end
+
+    it 'returns the correct difference for adding a qualifier to a claim (statement)' do
+      # HTML: https://www.wikidata.org/w/index.php?title=Q597236&oldid=1903003546
+      revision_id = 1903003546
+      diff = WikidataDiffAnalyzer.calculate_diff(revision_id)
+
+      expect(diff[:claim_diff]).to eq(0)
+      expect(diff[:reference_diff]).to eq(0)
+      expect(diff[:qualifier_diff]).to eq(1)
+    end
+
+    it 'returns the correct difference for adding a reference to a claim' do
+      # HTML: https://www.wikidata.org/w/index.php?title=Q597236&oldid=1863882476
+      revision_id = 1863882476
+      diff = WikidataDiffAnalyzer.calculate_diff(revision_id)
+
+      expect(diff[:claim_diff]).to eq(0)
+      expect(diff[:reference_diff]).to eq(1)
+      expect(diff[:qualifier_diff]).to eq(0)
+    end
+
+    it 'returns the correct difference for adding a reference to a claim using quickstatements' do
+      #HTML: https://www.wikidata.org/w/index.php?title=Q597236&oldid=535078533
+      revision_id = 535078533
+      diff = WikidataDiffAnalyzer.calculate_diff(revision_id)
+
+      expect(diff[:claim_diff]).to eq(0)
+      expect(diff[:reference_diff]).to eq(1)
+      expect(diff[:qualifier_diff]).to eq(0)
+    end
+end
+
 
