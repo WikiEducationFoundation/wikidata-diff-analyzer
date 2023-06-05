@@ -359,7 +359,7 @@ end
       # when the claim is removed, all the references and qualifiers in that claim are removed as well
       # currently, the count is general and not specific to the claim - but it's fine for now
       expect(diff[:reference_diff]).to eq(-1)
-      expect(diff[:qualifier_diff]).to eq(0)
+      expect(diff[:qualifier_diff]).to eq(-1)
     end
 
     it 'returns the correct difference for adding a qualifier to a claim (statement)' do
