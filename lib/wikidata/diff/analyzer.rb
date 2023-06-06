@@ -156,6 +156,24 @@ module WikidataDiffAnalyzer
     end
     return qualifiers_count
   end
+
+  # counts the total number of statements in the claims of the provided content.
+  def self.count_statements(content)
+    return 0 if content.nil?
+
+    claims = content['claims']
+    return 0 unless claims.is_a?(Hash)
+    statement_count = 0
+
+    claims.each do |_property, statements|
+      next unless statements.is_a?(Array)
+
+      statements.each do |statement|
+        statement_count += 1 if statement.is_a?(Hash) && statement['type'] == 'statement'
+      end
+    end
+    statement_count
+  end
   
   # Gets the parent id based on current revision id from the action:compare at Wikidata API.
   def self.get_parent_id(current_revision_id)
