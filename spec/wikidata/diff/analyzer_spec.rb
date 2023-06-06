@@ -28,6 +28,31 @@ require 'rspec'
   end
 end
 
+RSpec.describe WikidataDiffAnalyzer do
+  describe '.isolate_claim_differences' do
+    it 'returns the correct added, removed, and changed claims' do
+      current_content = WikidataDiffAnalyzer.get_revision_content(1895908644)
+      parent_id = WikidataDiffAnalyzer.get_parent_id(1895908644)
+      parent_content = WikidataDiffAnalyzer.get_revision_content(parent_id)
+
+      expected_result = {
+        added: [
+          { key: "P6589", index: 0 },
+          { key: "P6589", index: 1 }
+        ],
+        removed: [],
+        changed: [
+          { key: "P2196", index: 1 }
+        ]
+      }
+
+      result = WikidataDiffAnalyzer.isolate_claim_differences(current_content, parent_content)
+
+      expect(result).to eq(expected_result)
+    end
+  end
+end
+
 # testcases for claim count(Acutal API request)
 # Individual Revision Id: 1596238100
 # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1596238100&rvslots=main&rvprop=content&format=json

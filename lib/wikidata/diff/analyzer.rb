@@ -22,6 +22,11 @@ module WikidataDiffAnalyzer
         format: 'json'
       )
 
+      if response.nil?
+        puts "No response received for revision ID: #{revision_id}"
+        return nil
+      end
+
       # Get the page ID and revisions from the response
       page_id = response.data['pages'].keys.first
       revisions = response.data['pages'][page_id]['revisions']
@@ -46,6 +51,77 @@ module WikidataDiffAnalyzer
   end
 
 
+  def self.isolate_claim_differences(current_content, parent_content)
+    # Initialize empty arrays to store the added, removed, and changed claims
+    added_claims = []
+    removed_claims = []
+    changed_claims = []
+  
+    if current_content.nil? && parent_content.nil?
+      # Both current and parent content are nil, no changes
+      return {
+        added: added_claims,
+        removed: removed_claims,
+        changed: changed_claims
+      }
+    elsif current_content.nil?
+      # Only current content is nil, consider all claims in parent content as removed
+      parent_content["claims"].each do |claim_key, parent_claims|
+        parent_claims.each_index do |index|
+          removed_claims << { key: claim_key, index: index }
+        end
+      end
+    elsif parent_content.nil?
+      # Only parent content is nil, consider all claims in current content as added
+      current_content["claims"].each do |claim_key, current_claims|
+        current_claims.each_index do |index|
+          added_claims << { key: claim_key, index: index }
+        end
+      end
+    else
+      # Iterate over each claim key in the current content
+      current_content["claims"].each do |claim_key, current_claims|
+        # Check if the claim key exists in the parent content
+        if parent_content["claims"].key?(claim_key)
+          parent_claims = parent_content["claims"][claim_key]
+  
+          # Compare the current and parent claim arrays
+          if current_claims != parent_claims
+            current_claims.each_with_index do |current_claim, index|
+              if parent_claims[index] != current_claim
+                changed_claims << { key: claim_key, index: index }
+              end
+            end
+          end
+        else
+          current_claims.each_index do |index|
+            added_claims << { key: claim_key, index: index }
+          end
+        end
+      end
+  
+      # Iterate over each claim key in the parent content to find removed claims
+      parent_content["claims"].each do |claim_key, parent_claims|
+        unless current_content["claims"].key?(claim_key)
+          parent_claims.each_index do |index|
+            removed_claims << { key: claim_key, index: index }
+          end
+        end
+      end
+    end
+  
+    puts "added_claims: #{added_claims}"
+    puts "removed_claims: #{removed_claims}"
+    puts "changed_claims: #{changed_claims}"
+
+    # Return the added, removed, and changed claims
+    {
+      added: added_claims,
+      removed: removed_claims,
+      changed: changed_claims
+    }
+  end
+  
 # This method counts the total number of claims in the provided content.
 # It takes the parsed content as input and returns the count of claims.
   def self.count_claims(content)
@@ -223,6 +299,9 @@ module WikidataDiffAnalyzer
     reference_diff = current_reference_count - parent_reference_count
     qualifier_diff = current_qualifier_count - parent_qualifier_count
 
+    puts "Claim diff: #{claim_diff}"
+    puts "Reference diff: #{reference_diff}"
+    puts "Qualifier diff: #{qualifier_diff}"
     # return the difference
     return {
       claim_diff: claim_diff,
@@ -231,3 +310,9 @@ module WikidataDiffAnalyzer
     }
   end
 end
+
+current = WikidataDiffAnalyzer.get_revision_content(1895908644)
+parent_id = WikidataDiffAnalyzer.get_parent_id(1895908644)
+parent = WikidataDiffAnalyzer.get_revision_content(parent_id)
+WikidataDiffAnalyzer.isolate_claim_differences(current, parent)
+WikidataDiffAnalyzer.calculate_diff(1895908644)
