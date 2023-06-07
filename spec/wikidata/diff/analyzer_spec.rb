@@ -40,9 +40,9 @@ RSpec.describe '.isolate_claim_differences' do
 
     expected_result = {
         added: [
+          { key: "P2196", index: 1 },
           { key: "P6589", index: 0 },
-          { key: "P6589", index: 1 },
-          { key: "P2196", index: 1 }
+          { key: "P6589", index: 1 }
         ],
         removed: [],
         changed: []
