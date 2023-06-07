@@ -39,10 +39,14 @@ RSpec.describe '.isolate_claim_differences' do
     parent_content = WikidataDiffAnalyzer.get_revision_content(parent_id)
 
     expected_result = {
-      added_claims: [{:key=>"P2196", :index=>1}, {:key=>"P6589", :index=>0}, {:key=>"P6589", :index=>1}]
-      removed_claims: []
-      changed_claims: []
-    }
+        added: [
+          { key: "P6589", index: 0 },
+          { key: "P6589", index: 1 },
+          { key: "P2196", index: 1 }
+        ],
+        removed: [],
+        changed: []
+      }
     result = WikidataDiffAnalyzer.isolate_claim_differences(current_content, parent_content)
 
     expect(result).to eq(expected_result)
