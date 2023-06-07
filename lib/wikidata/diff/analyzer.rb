@@ -84,11 +84,24 @@ module WikidataDiffAnalyzer
         # Check if the claim key exists in the parent content
         if parent_content["claims"].key?(claim_key)
           parent_claims = parent_content["claims"][claim_key]
-  
-          # Compare the current and parent claim arrays
-          if current_claims != parent_claims
+          # Find out the claim that was added or removed because the length is not the same
+          if current_claims.length >= parent_claims.length
+            # Find out the claim that was added
             current_claims.each_with_index do |current_claim, index|
-              if parent_claims[index] != current_claim
+              parent_claim = parent_claims[index]
+              if parent_claim.nil?
+                added_claims << { key: claim_key, index: index }
+              elsif current_claim != parent_claim
+                changed_claims << { key: claim_key, index: index }
+              end
+            end
+          else
+            # Find out the claim that was removed
+            parent_claims.each_with_index do |parent_claim, index|
+              current_claim = current_claims[index]
+              if current_claim.nil?
+                removed_claims << { key: claim_key, index: index }
+              elsif current_claim != parent_claim
                 changed_claims << { key: claim_key, index: index }
               end
             end
@@ -99,7 +112,7 @@ module WikidataDiffAnalyzer
           end
         end
       end
-  
+        
       # Iterate over each claim key in the parent content to find removed claims
       parent_content["claims"].each do |claim_key, parent_claims|
         unless current_content["claims"].key?(claim_key)

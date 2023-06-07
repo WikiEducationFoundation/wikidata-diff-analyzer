@@ -29,6 +29,8 @@ require 'rspec'
 end
 
 RSpec.describe WikidataDiffAnalyzer do
+  # HTML: https://www.wikidata.org/w/index.php?diff=1895908644
+  # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1895908644&rvslots=main&rvprop=content&format=json
   describe '.isolate_claim_differences' do
     it 'returns the correct added, removed, and changed claims' do
       current_content = WikidataDiffAnalyzer.get_revision_content(1895908644)
@@ -36,16 +38,10 @@ RSpec.describe WikidataDiffAnalyzer do
       parent_content = WikidataDiffAnalyzer.get_revision_content(parent_id)
 
       expected_result = {
-        added: [
-          { key: "P6589", index: 0 },
-          { key: "P6589", index: 1 }
-        ],
-        removed: [],
-        changed: [
-          { key: "P2196", index: 1 }
-        ]
+        added_claims: [{:key=>"P2196", :index=>1}, {:key=>"P6589", :index=>0}, {:key=>"P6589", :index=>1}]
+        removed_claims: []
+        changed_claims: []
       }
-
       result = WikidataDiffAnalyzer.isolate_claim_differences(current_content, parent_content)
 
       expect(result).to eq(expected_result)
