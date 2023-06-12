@@ -53,6 +53,26 @@ RSpec.describe '.isolate_claim_differences' do
   end
 end
 
+# testcases for isolate_claim_differences
+# Individual Revision Id: 1863882476
+# HTML: https://www.wikidata.org/w/index.php?diff=1863882476
+# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1863882476&rvslots=main&rvprop=content&format=json
+RSpec.describe '.isolate_reference_differences' do
+  it 'returns the correct added, removed, and changed claims' do
+    current_content = WikidataDiffAnalyzer.get_revision_content(1863882476)
+    parent_id = WikidataDiffAnalyzer.get_parent_id(1863882476)
+    parent_content = WikidataDiffAnalyzer.get_revision_content(parent_id)
+
+    expected_result = {
+      added: [{:key=>"P11686", :index=>0, :reference=>{"hash"=>"99c0d544f9c1449044651cdae3b4b7720d44c50e", "snaks"=>{"P214"=>[{"snaktype"=>"value", "property"=>"P214", "hash"=>"65d02e60b216c442174de88f2406399a6b07a9d2", "datavalue"=>{"value"=>"130740537", "type"=>"string"}}]}, "snaks-order"=>["P214"]}}],
+      removed: [],
+      modified: []
+      }
+    result = WikidataDiffAnalyzer.isolate_reference_differences(current_content, parent_content)
+
+    expect(result).to eq(expected_result)
+  end
+end
 # testcases for claim count(Acutal API request)
 # Individual Revision Id: 1596238100
 # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1596238100&rvslots=main&rvprop=content&format=json
