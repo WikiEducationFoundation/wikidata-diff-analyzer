@@ -114,8 +114,8 @@ RSpec.describe '.isolate_reference_differences' do
     parent_content = WikidataDiffAnalyzer.get_revision_content(parent_id)
 
     expected_result = {
-      added: [{:key=>"P625", :index=>0}, {:key=>"P3500", :index=>0}],
-      removed: [{:key=>"P625", :index=>0}, {:key=>"P3500", :index=>0}],
+      added: [{:claim_index=>0, :claim_key=>"P3500", :reference_index=>0}],
+      removed: [{:claim_index=>0, :claim_key=>"P3500", :reference_index=>0}],
       modified: []
       }
     result = WikidataDiffAnalyzer.isolate_reference_differences(current_content, parent_content)
