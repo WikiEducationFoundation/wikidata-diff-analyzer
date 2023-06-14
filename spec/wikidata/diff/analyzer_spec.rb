@@ -90,9 +90,9 @@ RSpec.describe '.isolate_claim_differences' do
 end
 
 # testcases for isolate_reference_differences
-# Individual Revision Id: 1863882476
-# HTML: https://www.wikidata.org/w/index.php?diff=1863882476
-# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1863882476&rvslots=main&rvprop=content&format=json
+# Individual Revision Id: 535078533
+# HTML: https://www.wikidata.org/w/index.php?diff=535078533
+# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=535078533&rvslots=main&rvprop=content&format=json
 RSpec.describe '.isolate_reference_differences' do
   it 'returns the correct added, removed, and changed references' do
     current_content = WikidataDiffAnalyzer.get_revision_content(535078533)
@@ -108,6 +108,9 @@ RSpec.describe '.isolate_reference_differences' do
 
     expect(result).to eq(expected_result)
   end
+  # Individual Revision Id: 1780106722
+  # HTML: https://www.wikidata.org/w/index.php?diff=1780106722
+  # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1780106722&rvslots=main&rvprop=content&format=json
   it 'returns the correct added, removed, and changed references' do
     current_content = WikidataDiffAnalyzer.get_revision_content(1780106722)
     parent_id = WikidataDiffAnalyzer.get_parent_id(1780106722)
