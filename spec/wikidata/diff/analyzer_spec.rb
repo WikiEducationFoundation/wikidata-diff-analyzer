@@ -163,13 +163,13 @@ RSpec.describe '.isolate_reference_differences' do
 end
 
 # testcases for isolate_aliases_differences
-# Individual Revision Id: 1903003546
-# HTML: https://www.wikidata.org/w/index.php?diff=1903003546
-# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1903003546&rvslots=main&rvprop=content&format=json
+# Individual Revision Id: 1900774614
+# HTML: https://www.wikidata.org/w/index.php?diff=1900774614
+# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1900774614&rvslots=main&rvprop=content&format=json
 RSpec.describe '.isolate_aliases_differences' do
   it 'returns the correct added aliases' do
-    current_content = WikidataDiffAnalyzer.get_revision_content(1903003546)
-    parent_id = WikidataDiffAnalyzer.get_parent_id(1903003546)
+    current_content = WikidataDiffAnalyzer.get_revision_content(1900774614)
+    parent_id = WikidataDiffAnalyzer.get_parent_id(1900774614)
     parent_content = WikidataDiffAnalyzer.get_revision_content(parent_id)
 
     expected_result = {
@@ -226,9 +226,9 @@ RSpec.describe '.isolate_descriptions_differences' do
 end
 
 RSpec.describe '.isolate_sitelinks_differences' do
-  # Individual Revision Id: 1670943384
-  # HTML: https://www.wikidata.org/w/index.php?diff=1670943384
-  # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1670943384&rvslots=main&rvprop=content&format=json
+  # Individual Revision Id: 1633844937
+  # HTML: https://www.wikidata.org/w/index.php?diff=1633844937
+  # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1633844937&rvslots=main&rvprop=content&format=json
   it 'returns the correct added sitelinks' do
     current_content = WikidataDiffAnalyzer.get_revision_content(1633844937)
     parent_id = WikidataDiffAnalyzer.get_parent_id(1633844937)
