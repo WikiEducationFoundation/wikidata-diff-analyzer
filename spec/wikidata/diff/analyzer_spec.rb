@@ -243,6 +243,42 @@ RSpec.describe '.isolate_sitelinks_differences' do
 
     expect(result).to eq(expected_result)
   end
+
+  # Individual Revision Id: 1889506559
+  # HTML: https://www.wikidata.org/w/index.php?diff=1889506559
+  # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1889506559&rvslots=main&rvprop=content&format=json
+  it 'returns the correct removed sitelinks' do
+    current_content = WikidataDiffAnalyzer.get_revision_content(1889506559)
+    parent_id = WikidataDiffAnalyzer.get_parent_id(1889506559)
+    parent_content = WikidataDiffAnalyzer.get_revision_content(parent_id)
+
+    expected_result = {
+      added: {},
+      removed: {"nahwiki"=>{"site"=>"nahwiki", "title"=>"San Francisco, California", "badges"=>[]}},
+      changed: {}
+      }
+    result = WikidataDiffAnalyzer.isolate_sitelinks_differences(current_content, parent_content)
+
+    expect(result).to eq(expected_result)
+  end
+
+  # Individual Revision Id: 1813177540
+  # HTML: https://www.wikidata.org/w/index.php?diff=1813177540
+  # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1813177540&rvslots=main&rvprop=content&format=json
+  it 'returns the correct changed sitelinks' do
+    current_content = WikidataDiffAnalyzer.get_revision_content(1813177540)
+    parent_id = WikidataDiffAnalyzer.get_parent_id(1813177540)
+    parent_content = WikidataDiffAnalyzer.get_revision_content(parent_id)
+
+    expected_result = {
+      added: {},
+      removed: {},
+      changed: {"itwiki"=>{:current=>{"site"=>"itwiki", "title"=>"Università statale del Washington", "badges"=>[]}, :parent=>{"site"=>"itwiki", "title"=>"Washington State University", "badges"=>[]}}}
+      }
+    result = WikidataDiffAnalyzer.isolate_sitelinks_differences(current_content, parent_content)
+
+    expect(result).to eq(expected_result)
+  end
 end
 
 

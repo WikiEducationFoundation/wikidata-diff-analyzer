@@ -758,8 +758,8 @@ end
   end
 end
 
-current = WikidataDiffAnalyzer.get_revision_content(1633844937)
-parent_id = WikidataDiffAnalyzer.get_parent_id(1633844937)
+current = WikidataDiffAnalyzer.get_revision_content(1813177540)
+parent_id = WikidataDiffAnalyzer.get_parent_id(1813177540)
 parent = WikidataDiffAnalyzer.get_revision_content(parent_id)
 WikidataDiffAnalyzer.isolate_sitelinks_differences(current, parent)
-WikidataDiffAnalyzer.calculate_diff(1633844937)
+WikidataDiffAnalyzer.calculate_diff(1813177540)
