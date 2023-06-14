@@ -62,8 +62,8 @@ RSpec.describe '.isolate_claim_differences' do
 
     expected_result = {
         added: [],
-        removed: [],
-        changed: [{:key=>"P2196", :index=>1}]
+        removed: [{:key=>"P2196", :index=>1}],
+        changed: []
       }
     result = WikidataDiffAnalyzer.isolate_claim_differences(current_content, parent_content)
 
@@ -123,6 +123,47 @@ RSpec.describe '.isolate_reference_differences' do
     expect(result).to eq(expected_result)
   end
 end
+
+# testcases for isolate_qualifiers_differences
+# Individual Revision Id: 1903003546
+# HTML: https://www.wikidata.org/w/index.php?diff=1903003546
+# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1903003546&rvslots=main&rvprop=content&format=json
+RSpec.describe '.isolate_reference_differences' do
+  it 'returns the correct added qualifiers' do
+    current_content = WikidataDiffAnalyzer.get_revision_content(1903003546)
+    parent_id = WikidataDiffAnalyzer.get_parent_id(1903003546)
+    parent_content = WikidataDiffAnalyzer.get_revision_content(parent_id)
+
+    expected_result = {
+      added: [{:claim_key=>"P2196", :claim_index=>1, :qualifier_key=>"P585", :qualifier_index=>0}],
+      removed: [],
+      modified: []
+      }
+    result = WikidataDiffAnalyzer.isolate_qualifiers_differences(current_content, parent_content)
+
+    expect(result).to eq(expected_result)
+  end
+  # Individual Revision Id: 1902995129
+  # HTML: https://www.wikidata.org/w/index.php?diff=1902995129
+  # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1902995129&rvslots=main&rvprop=content&format=json
+  it 'returns the correct removed qualifiers' do
+    current_content = WikidataDiffAnalyzer.get_revision_content(1902995129)
+    parent_id = WikidataDiffAnalyzer.get_parent_id(1902995129)
+    parent_content = WikidataDiffAnalyzer.get_revision_content(parent_id)
+
+    expected_result = {
+      added: [],
+      removed: [{:claim_key=>"P2196", :claim_index=>1, :qualifier_key=>"P585", :qualifier_index=>0}],
+      modified: []
+      }
+    result = WikidataDiffAnalyzer.isolate_reference_differences(current_content, parent_content)
+
+    expect(result).to eq(expected_result)
+  end
+end
+
+
+
 # testcases for claim count(Acutal API request)
 # Individual Revision Id: 1596238100
 # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1596238100&rvslots=main&rvprop=content&format=json

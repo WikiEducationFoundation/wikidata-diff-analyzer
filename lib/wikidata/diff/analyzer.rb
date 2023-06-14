@@ -228,10 +228,9 @@ module WikidataDiffAnalyzer
     removed_claims.each do |claim|
       claim_key = claim[:key]
       claim_index = claim[:index]
+      parent_reference = parent_content["claims"]&.dig(claim_key, claim_index, "references") || []
 
-      current_references = current_content["claims"]&.dig(claim_key, claim_index, "references") || []
-
-      current_references.each_with_index do |current_ref, ref_index|
+      parent_reference.each_with_index do |current_ref, ref_index|
         removed_references << { claim_key: claim_key, claim_index: claim_index, reference_index: ref_index }
       end
     end
@@ -371,7 +370,7 @@ def self.isolate_qualifiers_differences(current_content, parent_content)
   removed_claims.each do |claim|
     claim_key = claim[:key]
     claim_index = claim[:index]
-    qualifiers = current_content["claims"]&.dig(claim_key, claim_index, "qualifiers") || {}
+    qualifiers = parent_content["claims"]&.dig(claim_key, claim_index, "qualifiers") || {}
 
     qualifiers.each do |qualifier_key, qualifier_values|
       qualifier_values.each_with_index do |qualifier_value, qualifier_index|
@@ -759,8 +758,8 @@ end
   end
 end
 
-current = WikidataDiffAnalyzer.get_revision_content(1903003546)
-parent_id = WikidataDiffAnalyzer.get_parent_id(1903003546)
+current = WikidataDiffAnalyzer.get_revision_content(1902995129)
+parent_id = WikidataDiffAnalyzer.get_parent_id(1902995129)
 parent = WikidataDiffAnalyzer.get_revision_content(parent_id)
 WikidataDiffAnalyzer.isolate_qualifiers_differences(current, parent)
-WikidataDiffAnalyzer.calculate_diff(1903003546)
+WikidataDiffAnalyzer.calculate_diff(1902995129)
