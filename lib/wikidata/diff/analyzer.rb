@@ -84,35 +84,33 @@ module WikidataDiffAnalyzer
         # Check if the claim key exists in the parent content
         if parent_content["claims"].key?(claim_key)
           parent_claims = parent_content["claims"][claim_key]
-          # Find out the claim that was added or removed because the length is not the same
-          if current_claims.length >= parent_claims.length
-            # Find out the claim that was added
-            current_claims.each_with_index do |current_claim, index|
-              parent_claim = parent_claims[index]
-              if parent_claim.nil?
-                added_claims << { key: claim_key, index: index }
-              elsif current_claim != parent_claim
-                changed_claims << { key: claim_key, index: index }
-              end
+          # Iterate over each claim in the current and parent content
+          current_claims.each_with_index do |current_claim, index|
+            parent_claim = parent_claims[index]
+            if parent_claim.nil?
+              # Claim was added
+              added_claims << { key: claim_key, index: index }
+            elsif current_claim != parent_claim
+              # Claim was changed
+              changed_claims << { key: claim_key, index: index }
             end
-          else
-            # Find out the claim that was removed
-            parent_claims.each_with_index do |parent_claim, index|
-              current_claim = current_claims[index]
-              if current_claim.nil?
-                removed_claims << { key: claim_key, index: index }
-              elsif current_claim != parent_claim
-                changed_claims << { key: claim_key, index: index }
-              end
+          end
+          # Check for removed claims
+          parent_claims.each_with_index do |parent_claim, index|
+            current_claim = current_claims[index]
+            if current_claim.nil?
+              # Claim was removed
+              removed_claims << { key: claim_key, index: index }
             end
           end
         else
+          # All claims in current content with this key were added
           current_claims.each_index do |index|
             added_claims << { key: claim_key, index: index }
           end
         end
       end
-        
+  
       # Iterate over each claim key in the parent content to find removed claims
       parent_content["claims"].each do |claim_key, parent_claims|
         unless current_content["claims"].key?(claim_key)
@@ -123,11 +121,10 @@ module WikidataDiffAnalyzer
       end
     end
   
-    puts "added_claims: #{added_claims}"
-    puts "removed_claims: #{removed_claims}"
-    puts "changed_claims: #{changed_claims}"
+    puts "Added claims: #{added_claims}"
+    puts "Removed claims: #{removed_claims}"
+    puts "Changed claims: #{changed_claims}"
 
-    # Return the added, removed, and changed claims
     {
       added: added_claims,
       removed: removed_claims,
@@ -135,7 +132,7 @@ module WikidataDiffAnalyzer
     }
   end
 
-  # # Refactored Version
+# Refactored Version
   # def self.isolate_claim_differences(current_content, parent_content)
   #   added_claims = []
   #   removed_claims = []
@@ -185,7 +182,10 @@ module WikidataDiffAnalyzer
   # end
   
   
+
+
 # This method counts the total number of claims in the provided content.
+
 # It takes the parsed content as input and returns the count of claims.
   def self.count_claims(content)
     return 0 if content.nil?
@@ -205,102 +205,76 @@ module WikidataDiffAnalyzer
   end
 
   def self.isolate_reference_differences(current_content, parent_content)
-    # Use isolate_claim_differences to get the added, removed, and modified claims
-    claim_differences = isolate_claim_differences(current_content, parent_content)
-  
-    added_claims = claim_differences[:added]
-    removed_claims = claim_differences[:removed]
-    modified_claims = claim_differences[:changed]
-  
-    # Initialize empty arrays to store the added, removed, and modified references
     added_references = []
     removed_references = []
     modified_references = []
   
-    # Process added claims
+    claim_differences = isolate_claim_differences(current_content, parent_content)
+    added_claims = claim_differences[:added]
+    removed_claims = claim_differences[:removed]
+    changed_claims = claim_differences[:changed]
+
     added_claims.each do |claim|
       claim_key = claim[:key]
       claim_index = claim[:index]
-  
-      current_claims = current_content["claims"]
-      next if current_claims.nil? || current_claims[claim_key].nil?
-  
-      current_claim = current_claims[claim_key][claim_index]
-      next if current_claim.nil?
-  
-      current_references = current_claim["references"]
-      next if current_references.nil?
-  
-      added_references.concat(current_references.each_with_index.map { |ref, index| { claim_key: claim_key, claim_index: claim_index, reference_index: index } })
+
+      current_references = current_content["claims"]&.dig(claim_key, claim_index, "references") || []
+
+      current_references.each_with_index do |current_ref, ref_index|
+        added_references << { claim_key: claim_key, claim_index: claim_index, reference_index: ref_index }
+      end
     end
-  
-    # Process removed claims
+
     removed_claims.each do |claim|
       claim_key = claim[:key]
       claim_index = claim[:index]
-  
-      parent_claims = parent_content["claims"]
-      next if parent_claims.nil? || parent_claims[claim_key].nil?
-  
-      parent_claim = parent_claims[claim_key][claim_index]
-      next if parent_claim.nil?
-  
-      parent_references = parent_claim["references"]
-      next if parent_references.nil?
-  
-      removed_references.concat(parent_references.each_with_index.map { |ref, index| { claim_key: claim_key, claim_index: claim_index, reference_index: index } })
+
+      current_references = current_content["claims"]&.dig(claim_key, claim_index, "references") || []
+
+      current_references.each_with_index do |current_ref, ref_index|
+        removed_references << { claim_key: claim_key, claim_index: claim_index, reference_index: ref_index }
+      end
     end
   
-    # Process modified claims
-    modified_claims.each do |claim|
+    changed_claims.each do |claim|
       claim_key = claim[:key]
       claim_index = claim[:index]
   
-      current_claims = current_content["claims"]
-      parent_claims = parent_content["claims"]
-      next if current_claims.nil? || parent_claims.nil? || current_claims[claim_key].nil? || parent_claims[claim_key].nil?
+      current_references = current_content["claims"]&.dig(claim_key, claim_index, "references") || []
+      parent_references = parent_content["claims"]&.dig(claim_key, claim_index, "references") || []
   
-      current_claim = current_claims[claim_key][claim_index]
-      parent_claim = parent_claims[claim_key][claim_index]
-      next if current_claim.nil? || parent_claim.nil?
+      current_references.each_with_index do |current_ref, ref_index|
+        if parent_references.empty?
+          added_references << { claim_key: claim_key, claim_index: claim_index, reference_index: ref_index }
+        elsif !parent_references.include?(current_ref)
+          added_references << { claim_key: claim_key, claim_index: claim_index, reference_index: ref_index }
+        elsif ref_modified?(current_ref, parent_references)
+          modified_references << { claim_key: claim_key, claim_index: claim_index, reference_index: ref_index }
+        end
+      end
   
-      current_references = current_claim["references"]
-      parent_references = parent_claim["references"]
-      next if current_references.nil? || parent_references.nil?
-  
-      # Check for added references
-      new_references = current_references - parent_references
-      added_references.concat(new_references.each_with_index.map { |ref, index| { claim_key: claim_key, claim_index: claim_index, reference_index: index } })
-  
-      # Check for removed references
-      removed_references.concat(parent_references.each_with_index.select { |ref, index| !current_references.include?(ref) }.map { |ref, index| { claim_key: claim_key, claim_index: claim_index, reference_index: index } })
-  
-      # Check for modified references
-      modified_references.concat(current_references.each_with_index.select { |ref, index| parent_references.include?(ref) && ref_modified?(ref, parent_references) }.map { |ref, index| { claim_key: claim_key, claim_index: claim_index, reference_index: index } })
+      parent_references.each_with_index do |parent_ref, ref_index|
+        if !current_references.include?(parent_ref)
+          removed_references << { claim_key: claim_key, claim_index: claim_index, reference_index: ref_index }
+        end
+      end
     end
   
     puts "Added references: #{added_references}"
     puts "Removed references: #{removed_references}"
     puts "Modified references: #{modified_references}"
-    # Return the added, removed, and modified references
-    {
-      added: added_references,
-      removed: removed_references,
-      modified: modified_references
-    }
+  
+    { added: added_references, removed: removed_references, modified: modified_references }
   end
   
-
   def self.ref_modified?(current_reference, parent_references)
     parent_references.each do |parent_reference|
       if current_reference["snaks"] != parent_reference["snaks"]
         return true
       end
     end
-  
     false
   end
-  
   
 # This method counts the total number of references in the claims of the provided content.
   def self.count_references(content)
@@ -366,133 +340,152 @@ module WikidataDiffAnalyzer
     end
     references_count
   end  
+# This method isolates the differences in qualifiers between two revisions of content.
+def self.isolate_qualifiers_differences(current_content, parent_content)
+  added_qualifiers = []
+  removed_qualifiers = []
+  changed_qualifiers = []
 
+  # Process added and removed claims
+  claim_diff = isolate_claim_differences(current_content, parent_content)
+  added_claims = claim_diff[:added]
+  removed_claims = claim_diff[:removed]
 
-  def self.isolate_qualifiers_difference(current_content, parent_content)
-    claim_diff = isolate_claim_differences(current_content, parent_content)
-  
-    added_qualifiers = []
-    removed_qualifiers = []
-    changed_qualifiers = []
-  
-    # Process added claims
-    claim_diff[:added].each do |claim|
-      current_claim = current_content["claims"][claim[:key]][claim[:index]]
-      process_qualifiers(current_claim, added_qualifiers, claim[:key], claim[:index])
-    end
-  
-    # Process removed claims
-    claim_diff[:removed].each do |claim|
-      parent_claim = parent_content["claims"][claim[:key]][claim[:index]]
-      process_qualifiers(parent_claim, removed_qualifiers, claim[:key], claim[:index])
-    end
-  
-    # Process changed claims
-    claim_diff[:changed].each do |claim|
-      current_claim = current_content["claims"][claim[:key]][claim[:index]]
-      parent_claim = parent_content["claims"][claim[:key]][claim[:index]]
-      process_changed_qualifiers(current_claim, parent_claim, changed_qualifiers, claim[:key], claim[:index])
-    end
+  added_claims.each do |claim|
+    claim_key = claim[:key]
+    claim_index = claim[:index]
+    qualifiers = current_content["claims"]&.dig(claim_key, claim_index, "qualifiers") || {}
 
-    puts "Added qualifiers: #{added_qualifiers}"
-    puts "Removed qualifiers: #{removed_qualifiers}"
-    puts "Changed qualifiers: #{changed_qualifiers}"
-  
-    {
-      added: added_qualifiers,
-      removed: removed_qualifiers,
-      changed: changed_qualifiers
-    }
-  end
-  
-  def self.process_qualifiers(claim, qualifiers_list, claim_key, claim_index)
-    return unless claim.is_a?(Hash) && claim.key?("qualifiers")
-  
-    claim["qualifiers"].each do |qualifier_key, qualifier_values|
-      qualifier_values.each_with_index do |_qualifier_value, qualifier_index|
-        qualifiers_list << {
-          claim_key: claim_key,
-          claim_index: claim_index,
-          qualifier_key: qualifier_key,
-          qualifier_index: qualifier_index
+    qualifiers.each do |qualifier_key, qualifier_values|
+      qualifier_values.each_with_index do |qualifier_value, qualifier_index|
+        added_qualifiers << {
+        claim_key: claim_key,
+        claim_index: claim_index,
+        qualifier_key: qualifier_key,
+        qualifier_index: qualifier_index
         }
       end
     end
   end
-  
-  def self.process_changed_qualifiers(current_claim, parent_claim, changed_qualifiers, claim_key, claim_index)
-    return unless current_claim.is_a?(Hash) && current_claim.key?("qualifiers") &&
-                  parent_claim.is_a?(Hash) && parent_claim.key?("qualifiers")
-  
-    current_claim["qualifiers"].each do |qualifier_key, current_qualifier_values|
-      parent_qualifier_values = parent_claim["qualifiers"][qualifier_key]
-  
-      next unless parent_qualifier_values.is_a?(Array) && current_qualifier_values.is_a?(Array)
-  
-      current_qualifier_values.each_with_index do |current_qualifier_value, qualifier_index|
-        parent_qualifier_value = parent_qualifier_values[qualifier_index]
-  
-        if parent_qualifier_value.nil?
-          changed_qualifiers << {
-            claim_key: claim_key,
-            claim_index: claim_index,
-            qualifier_key: qualifier_key,
-            qualifier_index: qualifier_index,
-            change_type: :added
-          }
-        elsif current_qualifier_value != parent_qualifier_value
-          changed_qualifiers << {
-            claim_key: claim_key,
-            claim_index: claim_index,
-            qualifier_key: qualifier_key,
-            qualifier_index: qualifier_index,
-            change_type: :changed
-          }
-        end
-      end
-  
-      # Check for removed qualifiers
-      parent_qualifier_values.each_with_index do |parent_qualifier_value, qualifier_index|
-        next unless qualifier_index >= current_qualifier_values.length
-  
-        changed_qualifiers << {
-          claim_key: claim_key,
-          claim_index: claim_index,
-          qualifier_key: qualifier_key,
-          qualifier_index: qualifier_index,
-          change_type: :removed
+
+  removed_claims.each do |claim|
+    claim_key = claim[:key]
+    claim_index = claim[:index]
+    qualifiers = current_content["claims"]&.dig(claim_key, claim_index, "qualifiers") || {}
+
+    qualifiers.each do |qualifier_key, qualifier_values|
+      qualifier_values.each_with_index do |qualifier_value, qualifier_index|
+        removed_qualifiers << {
+        claim_key: claim_key,
+        claim_index: claim_index,
+        qualifier_key: qualifier_key,
+        qualifier_index: qualifier_index
         }
       end
     end
   end
-  
-  
-  # counts the total number of qualifiers in the claims of the provided content.
-  # reference was an array whereas qualifier is a hash
-  def self.count_qualifiers(content)
-    return 0 if content.nil?
 
-    claims = content['claims']
-    return 0 unless claims.is_a?(Hash)
+  # Process changed claims
+  changed_claims = claim_diff[:changed]
 
-    qualifiers_count = 0
+  changed_claims.each do |claim|
+    claim_key = claim[:key]
+    claim_index = claim[:index]
+    current_qualifiers = current_content["claims"]&.dig(claim_key, claim_index, "qualifiers") || {}
+    parent_qualifiers = parent_content["claims"]&.dig(claim_key, claim_index, "qualifiers") || {}
 
-    # Iterate over the values of the claims hash
-    claims.values.each do |values|
-      # Check if values is an array
-      if values.is_a?(Array)
-        # Iterate over each value
-        values.each do |value|
-          # Check if the value has qualifiers and if qualifiers is a hash
-          if value.key?('qualifiers') && value['qualifiers'].is_a?(Hash)
-            # Increment the qualifiers count by the length of each array inside the hash
-            qualifiers_count += value['qualifiers'].map { |key, value| value.length }.reduce(0) { |sum, length| sum + length }
-          end
+    # Iterate over each claim key in the current content
+    current_qualifiers.each do |qualifier_key, qualifier_values|
+      qualifier_values.each_with_index do |qualifier_value, qualifier_index|
+        if parent_qualifiers.key?(qualifier_key)
+          parent = parent_qualifiers[key]
+        end
+        # Check if the qualifier index exists in the parent content
+        if !parent.nil?
+          parent = parent[qualifier_index]
+        end
+        if !parent.nil?
+          # Claim was changed
+          changed_qualifiers << {
+            claim_key: claim_key,
+            claim_index: claim_index,
+            qualifier_key: qualifier_key,
+            qualifier_index: qualifier_index
+          }
+        else
+          # Claim was added
+          added_qualifiers << {
+            claim_key: claim_key,
+            claim_index: claim_index,
+            qualifier_key: qualifier_key,
+            qualifier_index: qualifier_index
+          }
         end
       end
     end
-    return qualifiers_count
+    # Check for removed claims
+    parent_qualifiers.each do |qualifier_key, qualifier_values|
+      qualifier_values.each_with_index do |qualifier_value, qualifier_index|
+        if current_qualifiers.key?(qualifier_key)
+          current = current_qualifiers[qualifier_key]
+        end
+        # Check if the qualifier index exists in the current content
+        if !current.nil?
+          current = current[qualifier_index]
+        end
+        if current.nil?
+          # Claim was removed
+          removed_qualifiers << {
+            claim_key: claim_key,
+            claim_index: claim_index,
+            qualifier_key: qualifier_key,
+            qualifier_index: qualifier_index
+          }
+        end
+      end
+    end
   end
+
+
+  puts "added_qualifiers: #{added_qualifiers}"
+  puts "removed_qualifiers: #{removed_qualifiers}"
+  puts "changed_qualifiers: #{changed_qualifiers}"
+
+  {
+    added: added_qualifiers,
+    removed: removed_qualifiers,
+    changed: changed_qualifiers
+  }
+end
+
+# This method counts the total number of qualifiers in the claims of the provided content.
+# It takes one argument:
+# - content: a hash representing the content to count the qualifiers of
+# It returns an integer representing the total number of qualifiers in the content.
+def self.count_qualifiers(content)
+  return 0 if content.nil?
+
+  claims = content['claims']
+  return 0 unless claims.is_a?(Hash)
+
+  qualifiers_count = 0
+
+  # Iterate over the values of the claims hash
+  claims.values.each do |values|
+    # Check if values is an array
+    if values.is_a?(Array)
+      # Iterate over each value
+      values.each do |value|
+        # Check if the value has qualifiers and if qualifiers is a hash
+        if value.key?('qualifiers') && value['qualifiers'].is_a?(Hash)
+          # Increment the qualifiers count by the length of each array inside the hash
+          qualifiers_count += value['qualifiers'].map { |key, value| value.length }.reduce(0) { |sum, length| sum + length }
+        end
+      end
+    end
+  end
+  return qualifiers_count
+end
 
 
   def self.isolate_aliases_difference(current_content, parent_content)
@@ -766,8 +759,8 @@ module WikidataDiffAnalyzer
   end
 end
 
-current = WikidataDiffAnalyzer.get_revision_content(1780106722)
-parent_id = WikidataDiffAnalyzer.get_parent_id(1780106722)
+current = WikidataDiffAnalyzer.get_revision_content(1903003546)
+parent_id = WikidataDiffAnalyzer.get_parent_id(1903003546)
 parent = WikidataDiffAnalyzer.get_revision_content(parent_id)
-WikidataDiffAnalyzer.isolate_reference_differences(current, parent)
-WikidataDiffAnalyzer.calculate_diff(1780106722)
+WikidataDiffAnalyzer.isolate_qualifiers_differences(current, parent)
+WikidataDiffAnalyzer.calculate_diff(1903003546)

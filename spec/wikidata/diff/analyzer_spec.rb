@@ -28,12 +28,12 @@ require 'rspec'
   end
 end
 
-# testcases for isolate_claim_differences
-# Individual Revision Id: 1895908644
-# HTML: https://www.wikidata.org/w/index.php?diff=1895908644
-# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1895908644&rvslots=main&rvprop=content&format=json
+# testcase for isolate_claim_differences
 RSpec.describe '.isolate_claim_differences' do
-  it 'returns the correct added, removed, and changed claims' do
+  # Individual Revision Id: 1895908644
+  # HTML: https://www.wikidata.org/w/index.php?diff=1895908644
+  # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1895908644&rvslots=main&rvprop=content&format=json
+  it 'returns the correct added claims' do
     current_content = WikidataDiffAnalyzer.get_revision_content(1895908644)
     parent_id = WikidataDiffAnalyzer.get_parent_id(1895908644)
     parent_content = WikidataDiffAnalyzer.get_revision_content(parent_id)
@@ -51,21 +51,71 @@ RSpec.describe '.isolate_claim_differences' do
 
     expect(result).to eq(expected_result)
   end
+
+  it 'returns the correct removed claims' do
+    # Individual Revision Id: 1902995129
+    # HTML: https://www.wikidata.org/w/index.php?diff=1902995129
+    # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1902995129&rvslots=main&rvprop=content&format=json
+    current_content = WikidataDiffAnalyzer.get_revision_content(1902995129)
+    parent_id = WikidataDiffAnalyzer.get_parent_id(1902995129)
+    parent_content = WikidataDiffAnalyzer.get_revision_content(parent_id)
+
+    expected_result = {
+        added: [],
+        removed: [],
+        changed: [{:key=>"P2196", :index=>1}]
+      }
+    result = WikidataDiffAnalyzer.isolate_claim_differences(current_content, parent_content)
+
+    expect(result).to eq(expected_result)
+  end
+
+  it 'returns the correct changed claims' do
+    # Individual Revision Id: 1880197464
+    # HTML: https://www.wikidata.org/w/index.php?diff=1880197464
+    # JSON(current): https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1880197464&rvslots=main&rvprop=content&format=json
+    current_content = WikidataDiffAnalyzer.get_revision_content(1880197464)
+    parent_id = WikidataDiffAnalyzer.get_parent_id(1880197464)
+    parent_content = WikidataDiffAnalyzer.get_revision_content(parent_id)
+
+    expected_result = {
+        added: [],
+        removed: [],
+        changed: [{:key=>"P856", :index=>0}]
+      }
+    result = WikidataDiffAnalyzer.isolate_claim_differences(current_content, parent_content)
+
+    expect(result).to eq(expected_result)
+  end
 end
 
-# testcases for isolate_claim_differences
+# testcases for isolate_reference_differences
 # Individual Revision Id: 1863882476
 # HTML: https://www.wikidata.org/w/index.php?diff=1863882476
 # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1863882476&rvslots=main&rvprop=content&format=json
 RSpec.describe '.isolate_reference_differences' do
-  it 'returns the correct added, removed, and changed claims' do
-    current_content = WikidataDiffAnalyzer.get_revision_content(1863882476)
-    parent_id = WikidataDiffAnalyzer.get_parent_id(1863882476)
+  it 'returns the correct added, removed, and changed references' do
+    current_content = WikidataDiffAnalyzer.get_revision_content(535078533)
+    parent_id = WikidataDiffAnalyzer.get_parent_id(535078533)
     parent_content = WikidataDiffAnalyzer.get_revision_content(parent_id)
 
     expected_result = {
-      added: [{:key=>"P11686", :index=>0, :reference=>{"hash"=>"99c0d544f9c1449044651cdae3b4b7720d44c50e", "snaks"=>{"P214"=>[{"snaktype"=>"value", "property"=>"P214", "hash"=>"65d02e60b216c442174de88f2406399a6b07a9d2", "datavalue"=>{"value"=>"130740537", "type"=>"string"}}]}, "snaks-order"=>["P214"]}}],
+      added: [{:claim_key=>"P463", :claim_index=>1, :reference_index=>0}],
       removed: [],
+      modified: []
+      }
+    result = WikidataDiffAnalyzer.isolate_reference_differences(current_content, parent_content)
+
+    expect(result).to eq(expected_result)
+  end
+  it 'returns the correct added, removed, and changed references' do
+    current_content = WikidataDiffAnalyzer.get_revision_content(1780106722)
+    parent_id = WikidataDiffAnalyzer.get_parent_id(1780106722)
+    parent_content = WikidataDiffAnalyzer.get_revision_content(parent_id)
+
+    expected_result = {
+      added: [{:key=>"P625", :index=>0}, {:key=>"P3500", :index=>0}],
+      removed: [{:key=>"P625", :index=>0}, {:key=>"P3500", :index=>0}],
       modified: []
       }
     result = WikidataDiffAnalyzer.isolate_reference_differences(current_content, parent_content)
