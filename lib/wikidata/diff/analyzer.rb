@@ -263,7 +263,7 @@ module WikidataDiffAnalyzer
     puts "Removed references: #{removed_references}"
     puts "Modified references: #{modified_references}"
   
-    { added: added_references, removed: removed_references, modified: modified_references }
+    { added: added_references, removed: removed_references, changed: modified_references }
   end
   
   def self.ref_modified?(current_reference, parent_references)
@@ -487,7 +487,7 @@ def self.count_qualifiers(content)
 end
 
 
-  def self.isolate_aliases_difference(current_content, parent_content)
+  def self.isolate_aliases_differences(current_content, parent_content)
     return {} if current_content.nil? && parent_content.nil?
   
     current_aliases = current_content['aliases'] || {}
@@ -540,7 +540,7 @@ end
     }
   end
   
-  def self.isolate_labels_difference(current_content, parent_content)
+  def self.isolate_labels_differences(current_content, parent_content)
     return {} if current_content.nil? && parent_content.nil?
   
     current_labels = current_content['labels'] || {}
@@ -579,7 +579,7 @@ end
     }
   end
   
-  def self.isolate_descriptions_difference(current_content, parent_content)
+  def self.isolate_descriptions_differences(current_content, parent_content)
     return {} if current_content.nil? && parent_content.nil?
   
     current_descriptions = current_content['descriptions'] || {}
@@ -618,7 +618,7 @@ end
     }
   end
   
-  def self.isolate_sitelink_differences(current_content, parent_content)
+  def self.isolate_sitelinks_differences(current_content, parent_content)
     added_sitelinks = {}
     removed_sitelinks = {}
     changed_sitelinks = {}
@@ -758,8 +758,8 @@ end
   end
 end
 
-current = WikidataDiffAnalyzer.get_revision_content(1902995129)
-parent_id = WikidataDiffAnalyzer.get_parent_id(1902995129)
+current = WikidataDiffAnalyzer.get_revision_content(1633844937)
+parent_id = WikidataDiffAnalyzer.get_parent_id(1633844937)
 parent = WikidataDiffAnalyzer.get_revision_content(parent_id)
-WikidataDiffAnalyzer.isolate_qualifiers_differences(current, parent)
-WikidataDiffAnalyzer.calculate_diff(1902995129)
+WikidataDiffAnalyzer.isolate_sitelinks_differences(current, parent)
+WikidataDiffAnalyzer.calculate_diff(1633844937)
