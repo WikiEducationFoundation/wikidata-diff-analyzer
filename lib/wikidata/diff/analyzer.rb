@@ -111,11 +111,17 @@ module WikidataDiffAnalyzer
         end
       end
   
-      # Iterate over each claim key in the parent content to find removed claims
       parent_content["claims"].each do |claim_key, parent_claims|
-        unless current_content["claims"].key?(claim_key)
+        # current content[claims] can be nil
+        if current_content["claims"].nil? 
           parent_claims.each_index do |index|
             removed_claims << { key: claim_key, index: index }
+          end
+        else
+          if !current_content["claims"].key?(claim_key)
+            parent_claims.each_index do |index|
+              removed_claims << { key: claim_key, index: index }
+            end
           end
         end
       end
@@ -758,8 +764,9 @@ end
   end
 end
 
-current = WikidataDiffAnalyzer.get_revision_content(1813177540)
-parent_id = WikidataDiffAnalyzer.get_parent_id(1813177540)
+current = WikidataDiffAnalyzer.get_revision_content(1911025895)
+parent_id = WikidataDiffAnalyzer.get_parent_id(1911025895)
 parent = WikidataDiffAnalyzer.get_revision_content(parent_id)
-WikidataDiffAnalyzer.isolate_sitelinks_differences(current, parent)
-WikidataDiffAnalyzer.calculate_diff(1813177540)
+WikidataDiffAnalyzer.isolate_claim_differences(current, parent)
+WikidataDiffAnalyzer.isolate_reference_differences(current, parent)
+WikidataDiffAnalyzer.calculate_diff(1911025895)
