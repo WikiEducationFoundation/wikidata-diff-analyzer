@@ -1,20 +1,17 @@
-# Wikidata::Diff::Analyzer
+# WikidataDiffAnalyzer
 
-TODO: Delete this and the text below, and describe your gem
-
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/wikidata/diff/analyzer`. To experiment with that code, run `bin/console` for an interactive prompt.
+Welcome to WikidataDiffAnalyzer! The WikidataDiffAnalyzer is a Ruby gem that provides functionality to parse the differences between Wikidata revisions and extract statistics about the changes. It enables accurate analysis of Wikidata edits, such as counting the number of qualifiers added, references added, and other relevant statistics. This gem has been developed to enhance Wikidata statistics on the Wiki Education Dashboard and Programs & Events Dashboard, but it can be utilized for various other purposes as well.
 
 ## Installation
 
-TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
+To install the WikidataDiffAnalyzer gem, add it to your Gemfile:
+    $ gem 'wikidata_diff_analyzer'
 
-Install the gem and add to the application's Gemfile by executing:
+Then, run the following command:
+    $ bundle install
 
-    $ bundle add UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG
-
-If bundler is not being used to manage dependencies, install the gem by executing:
-
-    $ gem install UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG
+Alternatively, you can install it directly via:
+$ gem install wikidata_diff_analyzer
 
 ## Usage
 
