@@ -102,7 +102,6 @@ module WikidataDiffAnalyzer
 
 
   def self.accumulate_totals(diff, total)
-
     diff_data = diff
       total[:references_added] += diff_data[:added_references]
       total[:references_removed] += diff_data[:removed_references]
@@ -129,6 +128,8 @@ module WikidataDiffAnalyzer
 # This method retrieves the content of a specific revision from the Wikidata API.
 # It takes a revision ID as input and returns the parsed content as a Ruby object.
   def self.get_revision_content(revision_id)
+    # in case of the first revision, there is no parent revision
+    # currently we are not handling this case
     if revision_id.nil?
       return nil
     end
@@ -608,11 +609,11 @@ module WikidataDiffAnalyzer
   end
 end
 
-# current = WikidataDiffAnalyzer.get_revision_content(1903003546)
-# parent_id = WikidataDiffAnalyzer.get_parent_id(1903003546)
-# parent = WikidataDiffAnalyzer.get_revision_content(parent_id)
-# WikidataDiffAnalyzer.isolate_claim_differences(current, parent)
+current = WikidataDiffAnalyzer.get_revision_content(1880197464)
+parent_id = WikidataDiffAnalyzer.get_parent_id(1880197464)
+parent = WikidataDiffAnalyzer.get_revision_content(parent_id)
+WikidataDiffAnalyzer.isolate_claim_differences(current, parent)
 
-revision_ids = [1596231784,1915878420, 1895908644, 1902995129, 1880197464, 535078533, 1900774614, 670856707, 1670943384, 1633844937]
-analyzed_revisions = WikidataDiffAnalyzer.analyze(revision_ids)
-puts analyzed_revisions
+# revision_ids = [1596231784,1915878420, 1895908644, 1902995129, 1880197464, 535078533, 1900774614, 670856707, 1670943384, 1633844937]
+# analyzed_revisions = WikidataDiffAnalyzer.analyze(revision_ids)
+# puts analyzed_revisions
