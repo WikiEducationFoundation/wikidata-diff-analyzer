@@ -104,8 +104,8 @@ RSpec.describe '.isolate_reference_differences' do
       removed: [],
       changed: []
       }
-    result = WikidataDiffAnalyzer.isolate_reference_differences(current_content, parent_content)
-
+    claim_diff = WikidataDiffAnalyzer.isolate_claim_differences(current_content, parent_content)
+    result = WikidataDiffAnalyzer.isolate_reference_differences(claim_diff)
     expect(result).to eq(expected_result)
   end
   # Individual Revision Id: 1780106722
@@ -121,7 +121,9 @@ RSpec.describe '.isolate_reference_differences' do
       removed: [{:claim_index=>0, :claim_key=>"P3500", :reference_index=>0}],
       changed: []
       }
-    result = WikidataDiffAnalyzer.isolate_reference_differences(current_content, parent_content)
+
+    claim_diff = WikidataDiffAnalyzer.isolate_claim_differences(current_content, parent_content)
+    result = WikidataDiffAnalyzer.isolate_reference_differences(claim_diff)
 
     expect(result).to eq(expected_result)
   end
