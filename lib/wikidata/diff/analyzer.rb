@@ -6,14 +6,21 @@ require 'mediawiki_api'
 module WikidataDiffAnalyzer
   class Error < StandardError; end
 
+  # This method analyzes a set of revision ids and returns the differences between them.
   def self.analyze(revision_ids)
     diffs_analyzed_count = 0
     diffs_not_analyzed = []
     diffs = {}
     total = {
+      claims_added: 0,
+      claims_removed: 0,
+      claims_changed: 0,
       references_added: 0,
       references_removed: 0,
       references_changed: 0,
+      qualifiers_added: 0,
+      qualifiers_removed: 0,
+      qualifiers_changed: 0,
       aliases_added: 0,
       aliases_removed: 0,
       aliases_changed: 0,
@@ -25,13 +32,7 @@ module WikidataDiffAnalyzer
       descriptions_changed: 0,
       sitelinks_added: 0,
       sitelinks_removed: 0,
-      sitelinks_changed: 0,
-      qualifiers_added: 0,
-      qualifiers_removed: 0,
-      qualifiers_changed: 0,
-      claims_added: 0,
-      claims_removed: 0,
-      claims_changed: 0
+      sitelinks_changed: 0
     }
 
 
@@ -57,6 +58,7 @@ module WikidataDiffAnalyzer
     }
   end
 
+  # This method takes two revisions as input and returns the differences between them.
   def self.analyze_diff(current_content, parent_content)
     diff = {}
     # Calculate claim differences includes references and qualifiers
@@ -101,6 +103,7 @@ module WikidataDiffAnalyzer
   end
 
 
+  # 
   def self.accumulate_totals(diff, total)
     diff_data = diff
       total[:references_added] += diff_data[:added_references]
@@ -267,15 +270,15 @@ module WikidataDiffAnalyzer
       end
     end
   
-    puts "Added claims: #{added_claims}"
-    puts "Removed claims: #{removed_claims}"
-    puts "Changed claims: #{changed_claims}"
-    puts "Added references: #{added_references}"
-    puts "Removed references: #{removed_references}"
-    puts "Changed references: #{changed_references}"
-    puts "Added qualifiers: #{added_qualifiers}"
-    puts "Removed qualifiers: #{removed_qualifiers}"
-    puts "Changed qualifiers: #{changed_qualifiers}"
+    # puts "Added claims: #{added_claims}"
+    # puts "Removed claims: #{removed_claims}"
+    # puts "Changed claims: #{changed_claims}"
+    # puts "Added references: #{added_references}"
+    # puts "Removed references: #{removed_references}"
+    # puts "Changed references: #{changed_references}"
+    # puts "Added qualifiers: #{added_qualifiers}"
+    # puts "Removed qualifiers: #{removed_qualifiers}"
+    # puts "Changed qualifiers: #{changed_qualifiers}"
 
 
     {
@@ -291,11 +294,9 @@ module WikidataDiffAnalyzer
     }
   end
 
-  # helper method for adding references
+  # helper method for adding and removing references
   def self.reference_updates(claim, updated_references, claim_key, claim_index)
-    puts claim
     if claim["references"]
-      puts "references: #{claim["references"]}"
       claim["references"].each_with_index do |current_ref, ref_index|
         updated_references << { claim_key: claim_key, claim_index: claim_index, reference_index: ref_index }
       end
@@ -303,6 +304,7 @@ module WikidataDiffAnalyzer
     updated_references
   end
 
+  # helper method for changed references
   def self.handle_changed_references(current_claim, parent_claim, changed_references, added_references, removed_references, claim_key, claim_index)
     current_references = current_claim["references"] ? current_claim["references"] : []
     parent_references = parent_claim["references"] ? parent_claim["references"] : []
@@ -330,6 +332,7 @@ module WikidataDiffAnalyzer
     }
   end
 
+  # helper method for checking if a reference has been modified
   def self.ref_modified?(current_reference, parent_references)
     parent_references.each do |parent_reference|
       if current_reference["snaks"] != parent_reference["snaks"]
@@ -340,6 +343,7 @@ module WikidataDiffAnalyzer
   end
 
   # helper method for adding qualifiers
+  # handles added and removed qualifiers
   def self.qualifier_updates(claim, updated_qualifiers, claim_key, claim_index)
     if claim["qualifiers"]
       qualifiers = claim["qualifiers"]
@@ -357,6 +361,7 @@ module WikidataDiffAnalyzer
     updated_qualifiers
   end
 
+  # helper method for changed qualifiers
   def self.handle_changed_qualifiers(current_claim, parent_claim, changed_qualifiers, added_qualifiers, removed_qualifiers, claim_key, claim_index)
     current_qualifiers = current_claim["qualifiers"] ? current_claim["qualifiers"] : {}
     parent_qualifiers = parent_claim["qualifiers"] ? parent_claim["qualifiers"] : {}
@@ -418,6 +423,7 @@ module WikidataDiffAnalyzer
       changed_qualifiers: changed_qualifiers
     }
   end
+
 
   def self.isolate_aliases_differences(current_content, parent_content)
     return {} if current_content.nil? && parent_content.nil?
@@ -611,14 +617,3 @@ module WikidataDiffAnalyzer
     }
   end
 end
-
-current = WikidataDiffAnalyzer.get_revision_content(1880197464)
-parent_id = WikidataDiffAnalyzer.get_parent_id(1880197464)
-parent = WikidataDiffAnalyzer.get_revision_content(parent_id)
-WikidataDiffAnalyzer.isolate_claim_differences(current, parent)
-# revision_ids = [1596231784, 1596238100, 1898156691, 1895908644, 622872009, 1901195499, 1902995129, 1903003546, 1863882476, 535078533]
-# analyzed_revisions = WikidataDiffAnalyzer.analyze(revision_ids)
-# puts analyzed_revisions
-# revision_ids = [1596236983]
-# analyzed_revisions = WikidataDiffAnalyzer.analyze(revision_ids)
-# puts analyzed_revisions
