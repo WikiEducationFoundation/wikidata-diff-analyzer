@@ -5,17 +5,28 @@ Welcome to WikidataDiffAnalyzer! The WikidataDiffAnalyzer is a Ruby gem that pro
 ## Installation
 
 To install the WikidataDiffAnalyzer gem, add it to your Gemfile:
-    $ gem 'wikidata_diff_analyzer'
+   `$ gem 'wikidata_diff_analyzer'`
 
 Then, run the following command:
-    $ bundle install
+    `$ bundle install`
 
 Alternatively, you can install it directly via:
-$ gem install wikidata_diff_analyzer
+`$ gem install wikidata_diff_analyzer`
 
 ## Usage
+The `analyze` method allows you to analyze Wikidata edits and extract statistics about what changed.
 
-TODO: Write usage instructions here
+```
+# Import the gem
+require 'wikidata_diff_analyzer'
+
+# Pass an array of revision IDs to the analyze method
+revision_ids = ['1596238100', '1898156691', '1895908644']
+result = WikidataDiffAnalyzer.analyze(revision_ids)
+
+```
+The structure of the output of result is: 
+
 
 ## Development
 
