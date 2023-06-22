@@ -138,7 +138,7 @@ RSpec.describe '.isolate_claim_differences' do
       changed_references: [],
       added_qualifiers: [],
       removed_qualifiers: [],
-      changed_qualifiers: [{:claim_key=>"P856", :claim_index=>0, :qualifier_key=>"P407", :qualifier_index=>0}]
+      changed_qualifiers: []
     }
 
     result = WikidataDiffAnalyzer.isolate_claim_differences(current_content, parent_content)

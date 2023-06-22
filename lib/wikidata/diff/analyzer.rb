@@ -612,8 +612,8 @@ module WikidataDiffAnalyzer
   end
 end
 
-current = WikidataDiffAnalyzer.get_revision_content(1703045092)
-parent_id = WikidataDiffAnalyzer.get_parent_id(1703045092)
+current = WikidataDiffAnalyzer.get_revision_content(1880197464)
+parent_id = WikidataDiffAnalyzer.get_parent_id(1880197464)
 parent = WikidataDiffAnalyzer.get_revision_content(parent_id)
 WikidataDiffAnalyzer.isolate_claim_differences(current, parent)
 # revision_ids = [1596231784, 1596238100, 1898156691, 1895908644, 622872009, 1901195499, 1902995129, 1903003546, 1863882476, 535078533]
