@@ -267,15 +267,15 @@ module WikidataDiffAnalyzer
       end
     end
   
-    # puts "Added claims: #{added_claims}"
-    # puts "Removed claims: #{removed_claims}"
-    # puts "Changed claims: #{changed_claims}"
-    # puts "Added references: #{added_references}"
-    # puts "Removed references: #{removed_references}"
-    # puts "Changed references: #{changed_references}"
-    # puts "Added qualifiers: #{added_qualifiers}"
-    # puts "Removed qualifiers: #{removed_qualifiers}"
-    # puts "Changed qualifiers: #{changed_qualifiers}"
+    puts "Added claims: #{added_claims}"
+    puts "Removed claims: #{removed_claims}"
+    puts "Changed claims: #{changed_claims}"
+    puts "Added references: #{added_references}"
+    puts "Removed references: #{removed_references}"
+    puts "Changed references: #{changed_references}"
+    puts "Added qualifiers: #{added_qualifiers}"
+    puts "Removed qualifiers: #{removed_qualifiers}"
+    puts "Changed qualifiers: #{changed_qualifiers}"
 
 
     {
@@ -293,7 +293,9 @@ module WikidataDiffAnalyzer
 
   # helper method for adding references
   def self.reference_updates(claim, updated_references, claim_key, claim_index)
+    puts claim
     if claim["references"]
+      puts "references: #{claim["references"]}"
       claim["references"].each_with_index do |current_ref, ref_index|
         updated_references << { claim_key: claim_key, claim_index: claim_index, reference_index: ref_index }
       end
@@ -328,6 +330,15 @@ module WikidataDiffAnalyzer
     }
   end
 
+  def self.ref_modified?(current_reference, parent_references)
+    parent_references.each do |parent_reference|
+      if current_reference["snaks"] != parent_reference["snaks"]
+        return true
+      end
+    end
+    false
+  end
+
   # helper method for adding qualifiers
   def self.qualifier_updates(claim, updated_qualifiers, claim_key, claim_index)
     if claim["qualifiers"]
@@ -358,15 +369,16 @@ module WikidataDiffAnalyzer
         # Check if the qualifier index exists in the parent content
         if !parent.nil?
           parent = parent[qualifier_index]
-        end
-        if !parent.nil?
-          # Claim was changed
-          changed_qualifiers << {
-            claim_key: claim_key,
-            claim_index: claim_index,
-            qualifier_key: qualifier_key,
-            qualifier_index: qualifier_index
-          }
+        # check if the parent claim was changed by comparing the objects first
+          if parent != qualifier_value
+            # Claim was changed
+            changed_qualifiers << {
+              claim_key: claim_key,
+              claim_index: claim_index,
+              qualifier_key: qualifier_key,
+              qualifier_index: qualifier_index
+            }
+          end
         else
           # Claim was added
           added_qualifiers << {
@@ -405,15 +417,6 @@ module WikidataDiffAnalyzer
       removed_qualifiers: removed_qualifiers,
       changed_qualifiers: changed_qualifiers
     }
-  end
-  
-  def self.ref_modified?(current_reference, parent_references)
-    parent_references.each do |parent_reference|
-      if current_reference["snaks"] != parent_reference["snaks"]
-        return true
-      end
-    end
-    false
   end
 
   def self.isolate_aliases_differences(current_content, parent_content)
@@ -609,10 +612,13 @@ module WikidataDiffAnalyzer
   end
 end
 
-# current = WikidataDiffAnalyzer.get_revision_content(1880197464)
-# parent_id = WikidataDiffAnalyzer.get_parent_id(1880197464)
-# parent = WikidataDiffAnalyzer.get_revision_content(parent_id)
-# WikidataDiffAnalyzer.isolate_claim_differences(current, parent)
+current = WikidataDiffAnalyzer.get_revision_content(1703045092)
+parent_id = WikidataDiffAnalyzer.get_parent_id(1703045092)
+parent = WikidataDiffAnalyzer.get_revision_content(parent_id)
+WikidataDiffAnalyzer.isolate_claim_differences(current, parent)
 # revision_ids = [1596231784, 1596238100, 1898156691, 1895908644, 622872009, 1901195499, 1902995129, 1903003546, 1863882476, 535078533]
+# analyzed_revisions = WikidataDiffAnalyzer.analyze(revision_ids)
+# puts analyzed_revisions
+# revision_ids = [1596236983]
 # analyzed_revisions = WikidataDiffAnalyzer.analyze(revision_ids)
 # puts analyzed_revisions

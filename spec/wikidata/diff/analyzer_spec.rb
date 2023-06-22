@@ -4,6 +4,34 @@
 require './lib/wikidata/diff/analyzer'
 require 'rspec'
 
+# [1596238100, 1898156691, 1895908644, 622872009, 1901195499, 1902995129, 1903003546, 1863882476, 535078533]
+# [c-r 1 added q 2 added, c 1 added, c-r-f 3 added, c-1 added, c-1 added, c-r-f 1 removed, q-1 added, r-1 added, r-1 added]
+# HTML https://www.wikidata.org/w/index.php?title=Q111269579&diff=1596238100&oldid=1596236983
+# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1596238100&rvslots=main&rvprop=content&format=json
+
+# HTML: https://www.wikidata.org/w/index.php?title=Q111269579&diff=1898156691&oldid=1898156041
+# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1898156691&rvslots=main&rvprop=content&format=json
+
+# HTML: https://www.wikidata.org/w/index.php?title=Q111269579&diff=1895908644&oldid=1880197464
+# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1895908644&rvslots=main&rvprop=content&format=json
+
+# HTML: https://www.wikidata.org/w/index.php?title=Q111269579&diff=622872009&oldid=620411938
+# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=622872009&rvslots=main&rvprop=content&format=json
+
+# HTML: https://www.wikidata.org/w/index.php?title=Q111269579&diff=1901195499&oldid=1901195083
+# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1901195499&rvslots=main&rvprop=content&format=json
+
+# HTML: https://www.wikidata.org/w/index.php?title=Q111269579&diff=1903003546&oldid=1903003539
+# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1902995129&rvslots=main&rvprop=content&format=json
+
+# HTML: https://www.wikidata.org/w/index.php?title=Q597236&diff=1902995129&oldid=1900775402
+# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1903003546&rvslots=main&rvprop=content&format=json
+
+# HTML: https://www.wikidata.org/w/index.php?title=Q111269579&diff=1863882476&oldid=1863882469
+# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1863882476&rvslots=main&rvprop=content&format=json
+
+# HTML: https://www.wikidata.org/w/index.php?title=Q111269579&diff=535078533&oldid=535078524
+# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=535078533&rvslots=main&rvprop=content&format=json
 # testcases for analyze
 RSpec.describe WikidataDiffAnalyzer do
   describe '.analyze' do
@@ -331,25 +359,4 @@ RSpec.describe 'get_parent_id' do
   end
 end
 
-
-# [1596238100, 1898156691, 1895908644, 622872009, 1901195499, 1902995129, 1903003546, 1863882476, 535078533]
-# [c-r 1 added q 2 added, c 1 added, c-r-f 3 added, c-1 added, c-1 added, c-r-f 1 removed, q-1 added, r-1 added, r-1 added]
-# HTML https://www.wikidata.org/w/index.php?title=Q111269579&diff=1596238100&oldid=1596236983
-# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1596238100&rvslots=main&rvprop=content&format=json
-# HTML: https://www.wikidata.org/w/index.php?title=Q111269579&diff=1898156691&oldid=1898156041
-# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1898156691&rvslots=main&rvprop=content&format=json
-# HTML: https://www.wikidata.org/w/index.php?title=Q111269579&diff=1895908644&oldid=1880197464
-# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1895908644&rvslots=main&rvprop=content&format=json
-# HTML: https://www.wikidata.org/w/index.php?title=Q111269579&diff=622872009&oldid=620411938
-# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=622872009&rvslots=main&rvprop=content&format=json
-# HTML: https://www.wikidata.org/w/index.php?title=Q111269579&diff=1901195499&oldid=1901195083
-# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1901195499&rvslots=main&rvprop=content&format=json
-# HTML: https://www.wikidata.org/w/index.php?title=Q111269579&diff=1903003546&oldid=1903003539
-# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1902995129&rvslots=main&rvprop=content&format=json
-# HTML: https://www.wikidata.org/w/index.php?title=Q597236&diff=1902995129&oldid=1900775402
-# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1903003546&rvslots=main&rvprop=content&format=json
-# HTML: https://www.wikidata.org/w/index.php?title=Q111269579&diff=1863882476&oldid=1863882469
-# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1863882476&rvslots=main&rvprop=content&format=json
-# HTML: https://www.wikidata.org/w/index.php?title=Q111269579&diff=535078533&oldid=535078524
-# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=535078533&rvslots=main&rvprop=content&format=json
 
