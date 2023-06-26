@@ -128,6 +128,54 @@ module WikidataDiffAnalyzer
       total[:claims_removed] += diff_data[:removed_claims]
       total[:claims_changed] += diff_data[:changed_claims]
   end
+
+  # can handle multiple revision IDs of same page
+  # until 500
+  def self.get_revision_contents(revision_ids)
+    api_url = 'https://www.wikidata.org/w/api.php'
+    client = MediawikiApi::Client.new(api_url)
+  
+    begin
+      response = client.action(
+        'query',
+        prop: 'revisions',
+        revids: revision_ids.join('|'),
+        rvslots: 'main',
+        rvprop: 'content',
+        format: 'json'
+      )
+  
+      if response.nil?
+        puts "No response received for revision IDs: #{revision_ids.join(', ')}"
+        return {}
+      end
+  
+      parsed_contents = {}
+  
+      # Get the page ID and revisions from the response
+      page_id = response.data['pages'].keys.first
+      revisions = response.data['pages'][page_id]['revisions']
+      parsed_revisions = []
+  
+      revisions.each_with_index do |revision, index|
+        content = revision['slots']['main']['*']
+        parsed_content = JSON.parse(content)
+        parsed_revisions << parsed_content
+      end
+  
+      parsed_contents[page_id] = parsed_revisions
+  
+      return parsed_contents
+    rescue MediawikiApi::ApiError => e
+      puts "Error retrieving revision content: #{e.message}"
+      return {}
+    rescue JSON::ParserError => e
+      puts "Error parsing JSON content: #{e.message}"
+      raise e
+    end
+  end
+  
+  
 # This method retrieves the content of a specific revision from the Wikidata API.
 # It takes a revision ID as input and returns the parsed content as a Ruby object.
   def self.get_revision_content(revision_id)
@@ -617,3 +665,8 @@ module WikidataDiffAnalyzer
     }
   end
 end
+
+revision_ids = [1596231784, 1596231982]
+puts WikidataDiffAnalyzer.get_revision_contents(revision_ids)
+
+
