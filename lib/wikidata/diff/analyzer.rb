@@ -36,19 +36,54 @@ module WikidataDiffAnalyzer
     }
 
 
-    revision_ids.each do |revision_id|
-      current_content = get_revision_content(revision_id)
-      parent_id = get_parent_id(revision_id)
-      parent_content = get_revision_content(parent_id)
-      if current_content && parent_content
-        diff = analyze_diff(current_content, parent_content)
-        diffs[revision_id] = diff
-        accumulate_totals(diff, total)
-        diffs_analyzed_count += 1
-      else
-        diffs_not_analyzed << revision_id
+   # Split revision_ids and parent_ids into batches of 500
+  revision_ids_batches = revision_ids.each_slice(500).to_a
+
+  # Get contents for all revisions and their parent IDs
+  revision_contents = {}
+  revision_ids_batches.each do |batch|
+    fetched_revision_contents = get_revision_contents(batch)
+    if fetched_revision_contents
+      revision_contents.merge!(fetched_revision_contents)
+    else
+      (batch - fetched_revision_contents.keys).each do |missing_revision_id|
+        diffs_not_analyzed << missing_revision_id
       end
     end
+  end
+
+  parent_ids = revision_contents.values.map { |data| data[:parentid] }.reject { |id| id == 0 }
+  parent_ids_batches = parent_ids.each_slice(500).to_a
+
+  # Get contents for all parent revisions
+  parent_revision_contents = {}
+  parent_ids_batches.each do |batch|
+    fetched_parent_revision_contents = get_revision_contents(batch)
+    if fetched_parent_revision_contents
+      parent_revision_contents.merge!(fetched_parent_revision_contents)
+    else
+      (batch - fetched_parent_revision_contents.keys).each do |missing_parent_id|
+        diffs_not_analyzed << missing_parent_id
+      end
+    end
+  end
+
+  revision_contents.each do |revision_id, revision_data|
+    current_content = revision_data[:content]
+    parent_id = revision_data[:parentid]
+    parent_content = parent_revision_contents[parent_id][:content] if parent_id != 0
+
+    if current_content && parent_content
+      diff = analyze_diff(current_content, parent_content)
+      diffs[revision_id] = diff
+      accumulate_totals(diff, total)
+      diffs_analyzed_count += 1
+    else
+      diffs_not_analyzed << revision_id
+    end
+end
+
+
 
     {
       diffs_analyzed_count: diffs_analyzed_count,
@@ -129,52 +164,49 @@ module WikidataDiffAnalyzer
       total[:claims_changed] += diff_data[:changed_claims]
   end
 
-  # can handle multiple revision IDs of same page
-  # until 500
-  def self.get_revision_contents(revision_ids)
-    api_url = 'https://www.wikidata.org/w/api.php'
-    client = MediawikiApi::Client.new(api_url)
-  
-    begin
-      response = client.action(
-        'query',
-        prop: 'revisions',
-        revids: revision_ids.join('|'),
-        rvslots: 'main',
-        rvprop: 'content',
-        format: 'json'
-      )
-  
-      if response.nil?
-        puts "No response received for revision IDs: #{revision_ids.join(', ')}"
-        return {}
-      end
-  
-      parsed_contents = {}
-  
-      # Get the page ID and revisions from the response
-      page_id = response.data['pages'].keys.first
-      revisions = response.data['pages'][page_id]['revisions']
-      parsed_revisions = []
-  
-      revisions.each_with_index do |revision, index|
-        content = revision['slots']['main']['*']
-        parsed_content = JSON.parse(content)
-        parsed_revisions << parsed_content
-      end
-  
-      parsed_contents[page_id] = parsed_revisions
-  
-      return parsed_contents
-    rescue MediawikiApi::ApiError => e
-      puts "Error retrieving revision content: #{e.message}"
+
+def self.get_revision_contents(revision_ids)
+  api_url = 'https://www.wikidata.org/w/api.php'
+  client = MediawikiApi::Client.new(api_url)
+
+  begin
+    response = client.action(
+      'query',
+      prop: 'revisions',
+      revids: revision_ids.join('|'),
+      rvslots: 'main',
+      rvprop: 'content|ids',
+      format: 'json'
+    )
+
+    if response.nil?
+      puts "No response received for revision IDs: #{revision_ids.join(', ')}"
       return {}
-    rescue JSON::ParserError => e
-      puts "Error parsing JSON content: #{e.message}"
-      raise e
     end
+
+    parsed_contents = {}
+
+    response.data['pages'].values.each do |page|
+      revisions = page['revisions']
+      
+      revisions.each do |revision|
+        content = revision['slots']['main']['*']
+        revid = revision['revid']
+        parentid = revision['parentid']
+        parsed_contents[revid] = {content: JSON.parse(content), parentid: parentid}
+      end
+    end
+
+    return parsed_contents
+  rescue MediawikiApi::ApiError => e
+    puts "Error retrieving revision content: #{e.message}"
+    return {}
+  rescue JSON::ParserError => e
+    puts "Error parsing JSON content: #{e.message}"
+    raise e
   end
-  
+end
+
   
 # This method retrieves the content of a specific revision from the Wikidata API.
 # It takes a revision ID as input and returns the parsed content as a Ruby object.
@@ -225,8 +257,8 @@ module WikidataDiffAnalyzer
     end
   end
 
-  # Gets the parent id based on current revision id from the action:compare at Wikidata API.
-  def self.get_parent_id(current_revision_id)
+   # Gets the parent id based on current revision id from the action:compare at Wikidata API.
+   def self.get_parent_id(current_revision_id)
     client = MediawikiApi::Client.new('https://www.wikidata.org/w/api.php')
     response = client.action('compare', fromrev: current_revision_id, torelative: 'prev', format: 'json')
     data = response.data
@@ -666,7 +698,17 @@ module WikidataDiffAnalyzer
   end
 end
 
-revision_ids = [1596231784, 1596231982]
-puts WikidataDiffAnalyzer.get_revision_contents(revision_ids)
+revision_ids = [1780106722, 1903003546, 1902995129, 1596238100, 1898156691]
+revisions =[1780106722, 1903003546, 1902995129, 1596238100, 1898156691, 1895908644, 622872009, 1901195499, 1902995129, 1903003546, 1863882476, 535078533]
+# Test with your revision ids
+#puts WikidataDiffAnalyzer.analyze(revision_ids)
+# current = WikidataDiffAnalyzer.get_revision_content(1903003546)
+# parent_id = WikidataDiffAnalyzer.get_parent_id(1903003546)
+# parent = WikidataDiffAnalyzer.get_revision_content(parent_id)
+# puts WikidataDiffAnalyzer.isolate_claim_differences(current, parent)
+
+# Test with your revision ids
+contents = WikidataDiffAnalyzer.analyze(revisions)
+puts contents
 
 
