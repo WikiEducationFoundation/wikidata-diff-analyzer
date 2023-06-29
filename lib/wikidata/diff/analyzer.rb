@@ -35,6 +35,12 @@ module WikidataDiffAnalyzer
       sitelinks_changed: 0
     }
 
+    # if revision_ids has 0, then 0 can never be analyzed, so remove it and add in not analyzed
+    if revision_ids.include?(0)
+      revision_ids.delete(0)
+      diffs_not_analyzed << 0
+    end
+
     result = handle_large_batchs(revision_ids)
 
     puts "Analyzing #{result.length} revisions"
@@ -148,15 +154,16 @@ def self.handle_large_batchs(revision_ids)
     puts "Batch"
     puts batch.length
     contents = get_revision_contents(batch)
-    revision_contents.merge!(contents)
-
-    parent_ids = contents.values.map { |data| data[:parentid] }.compact
-    parent_contents_batch = get_revision_contents(parent_ids)
-    parent_contents.merge!(parent_contents_batch)
+    # merge if not nil
+    if contents
+      revision_contents.merge!(contents)
+      parent_ids = contents.values.map { |data| data[:parentid] }.compact
+      parent_contents_batch = get_revision_contents(parent_ids)
+      parent_contents.merge!(parent_contents_batch)
+    end
   end
 
-  puts "revision_contents"
-  puts revision_contents.length
+  
   result = {}
   revision_contents.each do |revid, data|
     parentid = data[:parentid]
@@ -196,7 +203,7 @@ def self.get_revision_contents(revision_ids)
     # checks if it has pages
     if response.data['pages'].nil?
       puts "No pages found in the response for revision IDs: #{revision_ids.join(', ')}"
-      return {}
+      return nil
     end
 
     puts "page count"
