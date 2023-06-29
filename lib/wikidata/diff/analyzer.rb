@@ -144,7 +144,7 @@ def self.handle_large_batches(revision_ids)
   revision_contents = {}
   parent_contents = {}
 
-  revision_ids_batches = revision_ids.each_slice(500).to_a
+  revision_ids_batches = revision_ids.each_slice(50).to_a
   puts "Number of batches"
   puts revision_ids_batches.length
   revision_ids_batches.each do |batch|
@@ -176,7 +176,12 @@ def self.get_revision_contents(revision_ids)
   client = MediawikiApi::Client.new(api_url)
 
   # remove duplicates if revision_ids exists
+  # check if duplicate revision_ids exist and print if exists
+
+  puts revision_ids.length
   revision_ids = revision_ids.uniq if revision_ids
+  puts "after deduplication"
+  puts revision_ids.length
 
   begin
     response = client.action(
@@ -201,9 +206,6 @@ def self.get_revision_contents(revision_ids)
       return nil
     end
 
-    puts "page count"
-    puts response.data['pages'].values.length
-
 
     response.data['pages'].keys.each do |page|
       page = response.data['pages'][page]
@@ -212,6 +214,7 @@ def self.get_revision_contents(revision_ids)
       revisions.each do |revision|
         content = revision['slots']['main']['*']
         revid = revision['revid']
+        puts "Revision ID: #{revid}"
         if revid == 0
           parsed_contents[revid] = {content: nil, parentid: 0}
         else
@@ -231,70 +234,70 @@ def self.get_revision_contents(revision_ids)
 end
 
   
-# # This method retrieves the content of a specific revision from the Wikidata API.
-# # It takes a revision ID as input and returns the parsed content as a Ruby object.
-#   def self.get_revision_content(revision_id)
-#     # in case of the first revision, there is no parent revision
-#     # currently we are not handling this case
-#     if revision_id.nil?
-#       return nil
-#     end
+# This method retrieves the content of a specific revision from the Wikidata API.
+# It takes a revision ID as input and returns the parsed content as a Ruby object.
+  def self.get_revision_content(revision_id)
+    # in case of the first revision, there is no parent revision
+    # currently we are not handling this case
+    if revision_id.nil?
+      return nil
+    end
 
-#     api_url = 'https://www.wikidata.org/w/api.php'
+    api_url = 'https://www.wikidata.org/w/api.php'
 
-#     client = MediawikiApi::Client.new(api_url)
-#     begin
-#       response = client.action(
-#         'query',
-#         prop: 'revisions',
-#         revids: revision_id,
-#         rvslots: 'main',
-#         rvprop: 'content',
-#         format: 'json'
-#       )
+    client = MediawikiApi::Client.new(api_url)
+    begin
+      response = client.action(
+        'query',
+        prop: 'revisions',
+        revids: revision_id,
+        rvslots: 'main',
+        rvprop: 'content',
+        format: 'json'
+      )
 
-#       if response.nil?
-#         puts "No response received for revision ID: #{revision_id}"
-#         return nil
-#       end
-#       # Get the page ID and revisions from the response
-#       page_id = response.data['pages'].keys.first
-#       revisions = response.data['pages'][page_id]['revisions']
-#       first_revision = revisions[0]
+      if response.nil?
+        puts "No response received for revision ID: #{revision_id}"
+        return nil
+      end
+      # Get the page ID and revisions from the response
+      page_id = response.data['pages'].keys.first
+      revisions = response.data['pages'][page_id]['revisions']
+      first_revision = revisions[0]
 
-#       # Get the content of the first revision
-#       content = first_revision['slots']['main']['*']
+      # Get the content of the first revision
+      content = first_revision['slots']['main']['*']
 
-#       # Parse the content as JSON
-#       parsed_content = JSON.parse(content)
+      # Parse the content as JSON
+      parsed_content = JSON.parse(content)
 
-#       # Return the parsed content
-#       return parsed_content
-#     rescue MediawikiApi::ApiError => e
-#       puts "Error retrieving revision content: #{e.message}"
-#       return nil
-#     rescue JSON::ParserError => e
-#       puts "Error parsing JSON content: #{e.message}"
-#       puts "Content: #{content}"
-#       raise e
-#     end
-#   end
+      # Return the parsed content
+      return parsed_content
+    rescue MediawikiApi::ApiError => e
+      puts "Error retrieving revision content: #{e.message}"
+      return nil
+    rescue JSON::ParserError => e
+      puts "Error parsing JSON content: #{e.message}"
+      puts "Content: #{content}"
+      raise e
+    end
+  end
 
-#    # Gets the parent id based on current revision id from the action:compare at Wikidata API.
-#    def self.get_parent_id(current_revision_id)
-#     client = MediawikiApi::Client.new('https://www.wikidata.org/w/api.php')
-#     response = client.action('compare', fromrev: current_revision_id, torelative: 'prev', format: 'json')
-#     data = response.data
-#     if data
-#       if data['fromrevid'].nil?
-#         return nil
-#       end
-#       parent_id = data['fromrevid']
-#       return parent_id
-#     else
-#       return nil
-#     end
-#   end
+   # Gets the parent id based on current revision id from the action:compare at Wikidata API.
+   def self.get_parent_id(current_revision_id)
+    client = MediawikiApi::Client.new('https://www.wikidata.org/w/api.php')
+    response = client.action('compare', fromrev: current_revision_id, torelative: 'prev', format: 'json')
+    data = response.data
+    if data
+      if data['fromrevid'].nil?
+        return nil
+      end
+      parent_id = data['fromrevid']
+      return parent_id
+    else
+      return nil
+    end
+  end
 
   def self.isolate_claim_differences(current_content, parent_content)
     # Initialize empty arrays to store the added, removed, and changed claims
@@ -307,6 +310,21 @@ end
     added_qualifiers = []
     removed_qualifiers = []
     changed_qualifiers = []
+
+    if !current_content["claims"].is_a?(Hash) || !parent_content["claims"].is_a?(Hash)
+      return {
+        added_claims: added_claims,
+        removed_claims: removed_claims,
+        changed_claims: changed_claims,
+        added_references: added_references,
+        removed_references: removed_references,
+        changed_references: changed_references,
+        added_qualifiers: added_qualifiers,
+        removed_qualifiers: removed_qualifiers,
+        changed_qualifiers: changed_qualifiers
+      }
+    end
+
 
 
     # Iterate over each claim key in the current content
@@ -529,21 +547,36 @@ end
 
 
   def self.isolate_aliases_differences(current_content, parent_content)
-    return {} if current_content.nil? && parent_content.nil?
+    return {
+      changed: [],
+      removed: [],
+      added: []
+    } if current_content.nil? && parent_content.nil?
   
     current_aliases = current_content['aliases'] || {}
     parent_aliases = parent_content['aliases'] || {}
-  
+
     changed_aliases = []
     removed_aliases = []
     added_aliases = []
   
+    if current_aliases.is_a?(Array) || parent_aliases.is_a?(Array)
+      return {
+      changed: changed_aliases,
+      removed: removed_aliases,
+      added: added_aliases
+      }
+    end
+  
     # Iterate over each language in the current aliases
-    current_aliases.each do |lang, current_aliases_arr|
+    (current_aliases || {}).each do |lang, current_aliases_arr|
       parent_aliases_arr = parent_aliases[lang]
   
       # Check if the language exists in the parent aliases
       if parent_aliases_arr
+        # Ensure that current_aliases_arr is always an array
+        current_aliases_arr = [current_aliases_arr] unless current_aliases_arr.is_a?(Array)
+  
         current_aliases_arr.each_with_index do |current_alias, index|
           parent_alias = parent_aliases_arr[index]
           if parent_alias.nil?
@@ -553,6 +586,9 @@ end
           end
         end
       else
+        # Ensure that current_aliases_arr is always an array
+        current_aliases_arr = [current_aliases_arr] unless current_aliases_arr.is_a?(Array)
+  
         current_aliases_arr.each_with_index do |current_alias, index|
           added_aliases << { lang: lang, index: index }
         end
@@ -560,7 +596,10 @@ end
     end
   
     # Iterate over each language in the parent aliases to find removed aliases
-    parent_aliases.each do |lang, parent_aliases_arr|
+    (parent_aliases || {}).each do |lang, parent_aliases_arr|
+      # Ensure that parent_aliases_arr is always an array
+      parent_aliases_arr = [parent_aliases_arr] unless parent_aliases_arr.is_a?(Array)
+  
       current_aliases_arr = current_aliases[lang]
   
       if current_aliases_arr.nil?
@@ -570,10 +609,6 @@ end
       end
     end
   
-    # puts "Changed aliases: #{changed_aliases}"
-    # puts "Removed aliases: #{removed_aliases}"
-    # puts "Added aliases: #{added_aliases}"
-
     {
       changed: changed_aliases,
       removed: removed_aliases,
@@ -581,18 +616,32 @@ end
     }
   end
   
+  
   def self.isolate_labels_differences(current_content, parent_content)
-    return {} if current_content.nil? && parent_content.nil?
+    return {
+      changed: [],
+      removed: [],
+      added: []
+    } if current_content.nil? && parent_content.nil?
   
     current_labels = current_content['labels'] || {}
     parent_labels = parent_content['labels'] || {}
-  
+
     changed_labels = []
     removed_labels = []
     added_labels = []
+
+    if current_labels.is_a?(Array) || parent_labels.is_a?(Array)
+      return {
+      changed: changed_labels,
+      removed: removed_labels,
+      added: added_labels
+      }
+    end
+
   
     # Iterate over each language in the current labels
-    current_labels.each do |lang, current_label|
+    (current_labels || {}).each do |lang, current_label|
       parent_label = parent_labels[lang]
   
       if parent_label.nil?
@@ -603,7 +652,7 @@ end
     end
   
     # Iterate over each language in the parent labels to find removed labels
-    parent_labels.each do |lang, parent_label|
+    (parent_labels || {}).each do |lang, parent_label|
       if current_labels[lang].nil?
         removed_labels << { lang: lang }
       end
@@ -619,19 +668,31 @@ end
       added: added_labels
     }
   end
-  
   def self.isolate_descriptions_differences(current_content, parent_content)
-    return {} if current_content.nil? && parent_content.nil?
+    return {
+      changed: [],
+      removed: [],
+      added: []
+    } if current_content.nil? && parent_content.nil?
   
     current_descriptions = current_content['descriptions'] || {}
     parent_descriptions = parent_content['descriptions'] || {}
+
   
-    changed_descriptions = []
-    removed_descriptions = []
-    added_descriptions = []
+    changed_descriptions = []    # Initialize as an array
+    removed_descriptions = []    # Initialize as an array
+    added_descriptions = []      # Initialize as an array
   
+    if !current_descriptions.is_a?(Hash) || !parent_descriptions.is_a?(Hash)
+      return{
+        changed: changed_descriptions,
+        removed: removed_descriptions,
+        added: added_descriptions
+      }
+    end
+
     # Iterate over each language in the current descriptions
-    current_descriptions.each do |lang, current_description|
+    (current_descriptions || {}).each do |lang, current_description|
       parent_description = parent_descriptions[lang]
   
       if parent_description.nil?
@@ -642,22 +703,20 @@ end
     end
   
     # Iterate over each language in the parent descriptions to find removed descriptions
-    parent_descriptions.each do |lang, parent_description|
+    (parent_descriptions || {}).each do |lang, parent_description|
       if current_descriptions[lang].nil?
         removed_descriptions << { lang: lang }
       end
     end
   
-    # puts "Changed descriptions: #{changed_descriptions}"
-    # puts "Removed descriptions: #{removed_descriptions}"
-    # puts "Added descriptions: #{added_descriptions}"
-
     {
       changed: changed_descriptions,
       removed: removed_descriptions,
       added: added_descriptions
     }
   end
+  
+  
   
   def self.isolate_sitelinks_differences(current_content, parent_content)
     added_sitelinks = {}
@@ -720,9 +779,9 @@ end
   end
 end
 
-revision_ids = [123, 456]
+revision_ids = [1765004817]
 revision_idss = [1780106722, 1903003546, 1902995129, 1596238100, 1898156691]
-revisions =[123, 456, 1780106722, 1596238100, 1898156691, 1895908644, 622872009, 1901195499, 1902995129, 1903003546, 1863882476, 535078533]
+revisions =[0, 123, 456, 1780106722, 1596238100, 1898156691, 1895908644, 622872009, 1901195499, 1902995129, 1903003546, 1863882476, 535078533]
 # Test with your revision ids
 #puts WikidataDiffAnalyzer.analyze(revision_ids)
 # current = WikidataDiffAnalyzer.get_revision_content(1903003546)
@@ -730,8 +789,14 @@ revisions =[123, 456, 1780106722, 1596238100, 1898156691, 1895908644, 622872009,
 # parent = WikidataDiffAnalyzer.get_revision_content(parent_id)
 # puts WikidataDiffAnalyzer.isolate_claim_differences(current, parent)
 
-# Test with your revision ids
-contents = WikidataDiffAnalyzer.analyze(revisions)
-puts contents
+
+
+# Generate an array of 500 random revision IDs
+random_revids = Array.new(50) { rand(1_000_000_000..2_000_000_000) }
+puts random_revids
+# Analyze the revisions
+contents = WikidataDiffAnalyzer.analyze(random_revids)
+puts contents[:diffs_analyzed_count]
+puts contents[:diffs_not_analyzed]
 
 

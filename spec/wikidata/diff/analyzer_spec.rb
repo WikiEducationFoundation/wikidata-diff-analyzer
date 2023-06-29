@@ -5,22 +5,12 @@ require './lib/wikidata/diff/analyzer'
 require 'rspec'
 
 # testcases for analyze
-# [1780106722, 1903003546, 1902995129, 1596238100, 1898156691, 1895908644, 622872009, 1901195499, 1902995129, 1903003546, 1863882476, 535078533]
-# [r-1 added r-1 removed, added 1 q, removed 1 q, c-r 1 added q 2 added, c 1 added, c-r-f 3 added, c-1 added, c-1 added, c-r-f 1 removed, q-1 added, r-1 added, r-1 added]
+#[0, 123, 456, 1780106722, 1596238100, 1898156691, 1895908644, 622872009, 1901195499, 1902995129, 1903003546, 1863882476, 535078533]
+# 0 and 123 not analyzed
 
 # Individual Revision Id: 1780106722 (added 1 reference and removed 1 reference)
 # HTML: https://www.wikidata.org/w/index.php?diff=1780106722
 # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1780106722&rvslots=main&rvprop=content&format=json
-
-# Individual Revision Id: 1903003546(added 1 qualifier)
-# HTML: https://www.wikidata.org/w/index.php?diff=1903003546
-# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1903003546&rvslots=main&rvprop=content&format=json
-
-# Individual Revision Id: 1902995129 (removed 1 qualifier)
-# HTML: https://www.wikidata.org/w/index.php?diff=1902995129
-# JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1902995129&rvslots=main&rvprop=content&format=json
-
-# Individual Revision Id: 1596231784 (Can't be analyzed) because no parent id
 
 # Individual Revision Id: 1596238100 (added 1 claim and references and 2 qualifiers)
 # HTML https://www.wikidata.org/w/index.php?title=Q111269579&diff=1596238100&oldid=1596236983
@@ -60,10 +50,10 @@ require 'rspec'
 RSpec.describe WikidataDiffAnalyzer do
   describe '.analyze' do
     it 'returns the correct result for a revision array' do
-      revision_ids = [1780106722, 1903003546, 1902995129, 1596231784, 1596238100, 1898156691, 1895908644, 622872009, 1901195499, 1902995129, 1903003546, 1863882476, 535078533]
+      revision_ids = [0, 123, 456, 1780106722, 1596238100, 1898156691, 1895908644, 622872009, 1901195499, 1902995129, 1903003546, 1863882476, 535078533]
       analyzed_revisions = WikidataDiffAnalyzer.analyze(revision_ids)
 
-      expected_result = {:diffs_analyzed_count=>12, :diffs_not_analyzed=>[1596231784], :diffs=>{1780106722=>{:added_claims=>0, :removed_claims=>0, :changed_claims=>2, :added_references=>1, :removed_references=>1, :changed_references=>0, :added_qualifiers=>0, :removed_qualifiers=>0, :changed_qualifiers=>0, :added_aliases=>0, :removed_aliases=>0, :changed_aliases=>0, :added_labels=>0, :removed_labels=>0, :changed_labels=>0, :added_descriptions=>0, :removed_descriptions=>0, :changed_descriptions=>0, :added_sitelinks=>0, :removed_sitelinks=>0, :changed_sitelinks=>0}, 1903003546=>{:added_claims=>0, :removed_claims=>0, :changed_claims=>1, :added_references=>0, :removed_references=>0, :changed_references=>0, :added_qualifiers=>1, :removed_qualifiers=>0, :changed_qualifiers=>0, :added_aliases=>0, :removed_aliases=>0, :changed_aliases=>0, :added_labels=>0, :removed_labels=>0, :changed_labels=>0, :added_descriptions=>0, :removed_descriptions=>0, :changed_descriptions=>0, :added_sitelinks=>0, :removed_sitelinks=>0, :changed_sitelinks=>0}, 1902995129=>{:added_claims=>0, :removed_claims=>1, :changed_claims=>0, :added_references=>0, :removed_references=>1, :changed_references=>0, :added_qualifiers=>0, :removed_qualifiers=>1, :changed_qualifiers=>0, :added_aliases=>0, :removed_aliases=>0, :changed_aliases=>0, :added_labels=>0, :removed_labels=>0, :changed_labels=>0, :added_descriptions=>0, :removed_descriptions=>0, :changed_descriptions=>0, :added_sitelinks=>0, :removed_sitelinks=>0, :changed_sitelinks=>0}, 1596238100=>{:added_claims=>1, :removed_claims=>0, :changed_claims=>0, :added_references=>1, :removed_references=>0, :changed_references=>0, :added_qualifiers=>2, :removed_qualifiers=>0, :changed_qualifiers=>0, :added_aliases=>0, :removed_aliases=>0, :changed_aliases=>0, :added_labels=>0, :removed_labels=>0, :changed_labels=>0, :added_descriptions=>0, :removed_descriptions=>0, :changed_descriptions=>0, :added_sitelinks=>0, :removed_sitelinks=>0, :changed_sitelinks=>0}, 1898156691=>{:added_claims=>1, :removed_claims=>0, :changed_claims=>0, :added_references=>0, :removed_references=>0, :changed_references=>0, :added_qualifiers=>0, :removed_qualifiers=>0, :changed_qualifiers=>0, :added_aliases=>0, :removed_aliases=>0, :changed_aliases=>0, :added_labels=>0, :removed_labels=>0, :changed_labels=>0, :added_descriptions=>0, :removed_descriptions=>0, :changed_descriptions=>0, :added_sitelinks=>0, :removed_sitelinks=>0, :changed_sitelinks=>0}, 1895908644=>{:added_claims=>3, :removed_claims=>0, :changed_claims=>0, :added_references=>3, :removed_references=>0, :changed_references=>0, :added_qualifiers=>3, :removed_qualifiers=>0, :changed_qualifiers=>0, :added_aliases=>0, :removed_aliases=>0, :changed_aliases=>0, :added_labels=>0, :removed_labels=>0, :changed_labels=>0, :added_descriptions=>0, :removed_descriptions=>0, :changed_descriptions=>0, :added_sitelinks=>0, :removed_sitelinks=>0, :changed_sitelinks=>0}, 622872009=>{:added_claims=>1, :removed_claims=>0, :changed_claims=>0, :added_references=>0, :removed_references=>0, :changed_references=>0, :added_qualifiers=>0, :removed_qualifiers=>0, :changed_qualifiers=>0, :added_aliases=>0, :removed_aliases=>0, :changed_aliases=>0, :added_labels=>0, :removed_labels=>0, :changed_labels=>0, :added_descriptions=>0, :removed_descriptions=>0, :changed_descriptions=>0, :added_sitelinks=>0, :removed_sitelinks=>0, :changed_sitelinks=>0}, 1901195499=>{:added_claims=>1, :removed_claims=>0, :changed_claims=>0, :added_references=>0, :removed_references=>0, :changed_references=>0, :added_qualifiers=>0, :removed_qualifiers=>0, :changed_qualifiers=>0, :added_aliases=>0, :removed_aliases=>0, :changed_aliases=>0, :added_labels=>0, :removed_labels=>0, :changed_labels=>0, :added_descriptions=>0, :removed_descriptions=>0, :changed_descriptions=>0, :added_sitelinks=>0, :removed_sitelinks=>0, :changed_sitelinks=>0}, 1863882476=>{:added_claims=>0, :removed_claims=>0, :changed_claims=>1, :added_references=>1, :removed_references=>0, :changed_references=>0, :added_qualifiers=>0, :removed_qualifiers=>0, :changed_qualifiers=>0, :added_aliases=>0, :removed_aliases=>0, :changed_aliases=>0, :added_labels=>0, :removed_labels=>0, :changed_labels=>0, :added_descriptions=>0, :removed_descriptions=>0, :changed_descriptions=>0, :added_sitelinks=>0, :removed_sitelinks=>0, :changed_sitelinks=>0}, 535078533=>{:added_claims=>0, :removed_claims=>0, :changed_claims=>1, :added_references=>1, :removed_references=>0, :changed_references=>0, :added_qualifiers=>0, :removed_qualifiers=>0, :changed_qualifiers=>0, :added_aliases=>0, :removed_aliases=>0, :changed_aliases=>0, :added_labels=>0, :removed_labels=>0, :changed_labels=>0, :added_descriptions=>0, :removed_descriptions=>0, :changed_descriptions=>0, :added_sitelinks=>0, :removed_sitelinks=>0, :changed_sitelinks=>0}}, :total=>{:references_added=>7, :references_removed=>3, :references_changed=>0, :aliases_added=>0, :aliases_removed=>0, :aliases_changed=>0, :labels_added=>0, :labels_removed=>0, :labels_changed=>0, :descriptions_added=>0, :descriptions_removed=>0, :descriptions_changed=>0, :sitelinks_added=>0, :sitelinks_removed=>0, :sitelinks_changed=>0, :qualifiers_added=>7, :qualifiers_removed=>2, :qualifiers_changed=>0, :claims_added=>7, :claims_removed=>2, :claims_changed=>6}}
+      expected_result = {:diffs_analyzed_count=>11, :diffs_not_analyzed=>[0, 123], :diffs=>{456=>{:added_claims=>0, :removed_claims=>0, :changed_claims=>0, :added_references=>0, :removed_references=>0, :changed_references=>0, :added_qualifiers=>0, :removed_qualifiers=>0, :changed_qualifiers=>0, :added_aliases=>0, :removed_aliases=>0, :changed_aliases=>0, :added_labels=>0, :removed_labels=>0, :changed_labels=>0, :added_descriptions=>0, :removed_descriptions=>0, :changed_descriptions=>0, :added_sitelinks=>1, :removed_sitelinks=>0, :changed_sitelinks=>0}, 535078533=>{:added_claims=>0, :removed_claims=>0, :changed_claims=>1, :added_references=>1, :removed_references=>0, :changed_references=>0, :added_qualifiers=>0, :removed_qualifiers=>0, :changed_qualifiers=>0, :added_aliases=>0, :removed_aliases=>0, :changed_aliases=>0, :added_labels=>0, :removed_labels=>0, :changed_labels=>0, :added_descriptions=>0, :removed_descriptions=>0, :changed_descriptions=>0, :added_sitelinks=>0, :removed_sitelinks=>0, :changed_sitelinks=>0}, 622872009=>{:added_claims=>1, :removed_claims=>0, :changed_claims=>0, :added_references=>0, :removed_references=>0, :changed_references=>0, :added_qualifiers=>0, :removed_qualifiers=>0, :changed_qualifiers=>0, :added_aliases=>0, :removed_aliases=>0, :changed_aliases=>0, :added_labels=>0, :removed_labels=>0, :changed_labels=>0, :added_descriptions=>0, :removed_descriptions=>0, :changed_descriptions=>0, :added_sitelinks=>0, :removed_sitelinks=>0, :changed_sitelinks=>0}, 1780106722=>{:added_claims=>0, :removed_claims=>0, :changed_claims=>2, :added_references=>1, :removed_references=>1, :changed_references=>0, :added_qualifiers=>0, :removed_qualifiers=>0, :changed_qualifiers=>0, :added_aliases=>0, :removed_aliases=>0, :changed_aliases=>0, :added_labels=>0, :removed_labels=>0, :changed_labels=>0, :added_descriptions=>0, :removed_descriptions=>0, :changed_descriptions=>0, :added_sitelinks=>0, :removed_sitelinks=>0, :changed_sitelinks=>0}, 1863882476=>{:added_claims=>0, :removed_claims=>0, :changed_claims=>1, :added_references=>1, :removed_references=>0, :changed_references=>0, :added_qualifiers=>0, :removed_qualifiers=>0, :changed_qualifiers=>0, :added_aliases=>0, :removed_aliases=>0, :changed_aliases=>0, :added_labels=>0, :removed_labels=>0, :changed_labels=>0, :added_descriptions=>0, :removed_descriptions=>0, :changed_descriptions=>0, :added_sitelinks=>0, :removed_sitelinks=>0, :changed_sitelinks=>0}, 1895908644=>{:added_claims=>3, :removed_claims=>0, :changed_claims=>0, :added_references=>3, :removed_references=>0, :changed_references=>0, :added_qualifiers=>3, :removed_qualifiers=>0, :changed_qualifiers=>0, :added_aliases=>0, :removed_aliases=>0, :changed_aliases=>0, :added_labels=>0, :removed_labels=>0, :changed_labels=>0, :added_descriptions=>0, :removed_descriptions=>0, :changed_descriptions=>0, :added_sitelinks=>0, :removed_sitelinks=>0, :changed_sitelinks=>0}, 1898156691=>{:added_claims=>1, :removed_claims=>0, :changed_claims=>0, :added_references=>0, :removed_references=>0, :changed_references=>0, :added_qualifiers=>0, :removed_qualifiers=>0, :changed_qualifiers=>0, :added_aliases=>0, :removed_aliases=>0, :changed_aliases=>0, :added_labels=>0, :removed_labels=>0, :changed_labels=>0, :added_descriptions=>0, :removed_descriptions=>0, :changed_descriptions=>0, :added_sitelinks=>0, :removed_sitelinks=>0, :changed_sitelinks=>0}, 1902995129=>{:added_claims=>0, :removed_claims=>1, :changed_claims=>0, :added_references=>0, :removed_references=>1, :changed_references=>0, :added_qualifiers=>0, :removed_qualifiers=>1, :changed_qualifiers=>0, :added_aliases=>0, :removed_aliases=>0, :changed_aliases=>0, :added_labels=>0, :removed_labels=>0, :changed_labels=>0, :added_descriptions=>0, :removed_descriptions=>0, :changed_descriptions=>0, :added_sitelinks=>0, :removed_sitelinks=>0, :changed_sitelinks=>0}, 1903003546=>{:added_claims=>0, :removed_claims=>0, :changed_claims=>1, :added_references=>0, :removed_references=>0, :changed_references=>0, :added_qualifiers=>1, :removed_qualifiers=>0, :changed_qualifiers=>0, :added_aliases=>0, :removed_aliases=>0, :changed_aliases=>0, :added_labels=>0, :removed_labels=>0, :changed_labels=>0, :added_descriptions=>0, :removed_descriptions=>0, :changed_descriptions=>0, :added_sitelinks=>0, :removed_sitelinks=>0, :changed_sitelinks=>0}, 1596238100=>{:added_claims=>1, :removed_claims=>0, :changed_claims=>0, :added_references=>1, :removed_references=>0, :changed_references=>0, :added_qualifiers=>2, :removed_qualifiers=>0, :changed_qualifiers=>0, :added_aliases=>0, :removed_aliases=>0, :changed_aliases=>0, :added_labels=>0, :removed_labels=>0, :changed_labels=>0, :added_descriptions=>0, :removed_descriptions=>0, :changed_descriptions=>0, :added_sitelinks=>0, :removed_sitelinks=>0, :changed_sitelinks=>0}, 1901195499=>{:added_claims=>1, :removed_claims=>0, :changed_claims=>0, :added_references=>0, :removed_references=>0, :changed_references=>0, :added_qualifiers=>0, :removed_qualifiers=>0, :changed_qualifiers=>0, :added_aliases=>0, :removed_aliases=>0, :changed_aliases=>0, :added_labels=>0, :removed_labels=>0, :changed_labels=>0, :added_descriptions=>0, :removed_descriptions=>0, :changed_descriptions=>0, :added_sitelinks=>0, :removed_sitelinks=>0, :changed_sitelinks=>0}}, :total=>{:claims_added=>7, :claims_removed=>1, :claims_changed=>5, :references_added=>7, :references_removed=>2, :references_changed=>0, :qualifiers_added=>6, :qualifiers_removed=>1, :qualifiers_changed=>0, :aliases_added=>0, :aliases_removed=>0, :aliases_changed=>0, :labels_added=>0, :labels_removed=>0, :labels_changed=>0, :descriptions_added=>0, :descriptions_removed=>0, :descriptions_changed=>0, :sitelinks_added=>1, :sitelinks_removed=>0, :sitelinks_changed=>0}}
       expect(analyzed_revisions).to eq(expected_result)
     end
   end
@@ -135,9 +125,9 @@ RSpec.describe '.isolate_claim_differences' do
   # HTML: https://www.wikidata.org/w/index.php?diff=1895908644
   # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1895908644&rvslots=main&rvprop=content&format=json
   it 'returns the correct added claims' do
-    current_content = WikidataDiffAnalyzer.get_revision_content(1895908644)
-    parent_id = WikidataDiffAnalyzer.get_parent_id(1895908644)
-    parent_content = WikidataDiffAnalyzer.get_revision_content(parent_id)
+    result = WikidataDiffAnalyzer.handle_large_batches([1895908644])
+    current_content = result[1895908644][:current_content]
+    parent_content = result[1895908644][:parent_content]
 
     expected_result = {
       added_claims: [{:key=>"P2196", :index=>1}, {:key=>"P6589", :index=>0}, {:key=>"P6589", :index=>1}],
@@ -160,9 +150,9 @@ RSpec.describe '.isolate_claim_differences' do
     # Individual Revision Id: 1902995129
     # HTML: https://www.wikidata.org/w/index.php?diff=1902995129
     # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1902995129&rvslots=main&rvprop=content&format=json
-    current_content = WikidataDiffAnalyzer.get_revision_content(1902995129)
-    parent_id = WikidataDiffAnalyzer.get_parent_id(1902995129)
-    parent_content = WikidataDiffAnalyzer.get_revision_content(parent_id)
+    result = WikidataDiffAnalyzer.handle_large_batches([1902995129])
+    current_content = result[1902995129][:current_content]
+    parent_content = result[1902995129][:parent_content]
 
     expected_result = {
       added_claims: [],
@@ -185,9 +175,9 @@ RSpec.describe '.isolate_claim_differences' do
     # Individual Revision Id: 1880197464
     # HTML: https://www.wikidata.org/w/index.php?diff=1880197464
     # JSON(current): https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1880197464&rvslots=main&rvprop=content&format=json
-    current_content = WikidataDiffAnalyzer.get_revision_content(1880197464)
-    parent_id = WikidataDiffAnalyzer.get_parent_id(1880197464)
-    parent_content = WikidataDiffAnalyzer.get_revision_content(parent_id)
+    result = WikidataDiffAnalyzer.handle_large_batches([1880197464])
+    current_content = result[1880197464][:current_content]
+    parent_content = result[1880197464][:parent_content]
 
     expected_result = {
       added_claims: [],
@@ -214,9 +204,9 @@ RSpec.describe '.isolate_aliases_differences' do
   # HTML: https://www.wikidata.org/w/index.php?diff=1900774614
   # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1900774614&rvslots=main&rvprop=content&format=json
   it 'returns the correct added aliases' do
-    current_content = WikidataDiffAnalyzer.get_revision_content(1900774614)
-    parent_id = WikidataDiffAnalyzer.get_parent_id(1900774614)
-    parent_content = WikidataDiffAnalyzer.get_revision_content(parent_id)
+    result = WikidataDiffAnalyzer.handle_large_batches([1900774614])
+    current_content = result[1900774614][:current_content]
+    parent_content = result[1900774614][:parent_content]
 
     expected_result = {
       added: [{:lang=>"en", :index=>4}],
@@ -235,9 +225,9 @@ RSpec.describe '.isolate_labels_differences' do
 # HTML: https://www.wikidata.org/w/index.php?diff=670856707
 # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=670856707&rvslots=main&rvprop=content&format=json
   it 'returns the correct added labels' do
-    current_content = WikidataDiffAnalyzer.get_revision_content(670856707)
-    parent_id = WikidataDiffAnalyzer.get_parent_id(670856707)
-    parent_content = WikidataDiffAnalyzer.get_revision_content(parent_id)
+    result = WikidataDiffAnalyzer.handle_large_batches([670856707])
+    current_content = result[670856707][:current_content]
+    parent_content = result[670856707][:parent_content]
 
     expected_result = {
       added: [{:lang=>"he"}],
@@ -256,9 +246,9 @@ RSpec.describe '.isolate_descriptions_differences' do
 # HTML: https://www.wikidata.org/w/index.php?diff=1670943384
 # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1670943384&rvslots=main&rvprop=content&format=json
   it 'returns the correct added descriptions' do
-    current_content = WikidataDiffAnalyzer.get_revision_content(1670943384)
-    parent_id = WikidataDiffAnalyzer.get_parent_id(1670943384)
-    parent_content = WikidataDiffAnalyzer.get_revision_content(parent_id)
+    result = WikidataDiffAnalyzer.handle_large_batches([1670943384])
+    current_content = result[1670943384][:current_content]
+    parent_content = result[1670943384][:parent_content]
 
     expected_result = {
       added: [],
@@ -276,9 +266,9 @@ RSpec.describe '.isolate_sitelinks_differences' do
   # HTML: https://www.wikidata.org/w/index.php?diff=1633844937
   # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1633844937&rvslots=main&rvprop=content&format=json
   it 'returns the correct added sitelinks' do
-    current_content = WikidataDiffAnalyzer.get_revision_content(1633844937)
-    parent_id = WikidataDiffAnalyzer.get_parent_id(1633844937)
-    parent_content = WikidataDiffAnalyzer.get_revision_content(parent_id)
+    result = WikidataDiffAnalyzer.handle_large_batches([1633844937])
+    current_content = result[1633844937][:current_content]
+    parent_content = result[1633844937][:parent_content]
 
     expected_result = {
       added: {"arzwiki"=>{"site"=>"arzwiki", "title"=>"جامعة ولاية واشينطون", "badges"=>[]}},
@@ -294,9 +284,9 @@ RSpec.describe '.isolate_sitelinks_differences' do
   # HTML: https://www.wikidata.org/w/index.php?diff=1889506559
   # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1889506559&rvslots=main&rvprop=content&format=json
   it 'returns the correct removed sitelinks' do
-    current_content = WikidataDiffAnalyzer.get_revision_content(1889506559)
-    parent_id = WikidataDiffAnalyzer.get_parent_id(1889506559)
-    parent_content = WikidataDiffAnalyzer.get_revision_content(parent_id)
+    result = WikidataDiffAnalyzer.handle_large_batches([1889506559])
+    current_content = result[1889506559][:current_content]
+    parent_content = result[1889506559][:parent_content]
 
     expected_result = {
       added: {},
@@ -312,9 +302,10 @@ RSpec.describe '.isolate_sitelinks_differences' do
   # HTML: https://www.wikidata.org/w/index.php?diff=1813177540
   # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=1813177540&rvslots=main&rvprop=content&format=json
   it 'returns the correct changed sitelinks' do
-    current_content = WikidataDiffAnalyzer.get_revision_content(1813177540)
-    parent_id = WikidataDiffAnalyzer.get_parent_id(1813177540)
-    parent_content = WikidataDiffAnalyzer.get_revision_content(parent_id)
+    result = WikidataDiffAnalyzer.handle_large_batches([1813177540])
+    current_content = result[1813177540][:current_content]
+    parent_content = result[1813177540][:parent_content]
+
 
     expected_result = {
       added: {},
