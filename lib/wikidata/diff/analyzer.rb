@@ -35,55 +35,25 @@ module WikidataDiffAnalyzer
       sitelinks_changed: 0
     }
 
+    result = handle_large_batchs(revision_ids)
 
-   # Split revision_ids and parent_ids into batches of 500
-  revision_ids_batches = revision_ids.each_slice(500).to_a
+    puts "Analyzing #{result.length} revisions"
 
-  # Get contents for all revisions and their parent IDs
-  revision_contents = {}
-  revision_ids_batches.each do |batch|
-    fetched_revision_contents = get_revision_contents(batch)
-    if fetched_revision_contents
-      revision_contents.merge!(fetched_revision_contents)
-    else
-      (batch - fetched_revision_contents.keys).each do |missing_revision_id|
-        diffs_not_analyzed << missing_revision_id
+    # result is a hash which has contents like this:
+    # result[revid] = { current_content: data[:content], parent_content: parent_content }
+
+    result.each do |revision_id, revision_data|
+      current_content = revision_data[:current_content]
+      parent_content = revision_data[:parent_content]
+      if current_content && parent_content
+        diff = analyze_diff(current_content, parent_content)
+        diffs[revision_id] = diff
+        accumulate_totals(diff, total)
+        diffs_analyzed_count += 1
+      else
+        diffs_not_analyzed << revision_id
       end
     end
-  end
-
-  parent_ids = revision_contents.values.map { |data| data[:parentid] }.reject { |id| id == 0 }
-  parent_ids_batches = parent_ids.each_slice(500).to_a
-
-  # Get contents for all parent revisions
-  parent_revision_contents = {}
-  parent_ids_batches.each do |batch|
-    fetched_parent_revision_contents = get_revision_contents(batch)
-    if fetched_parent_revision_contents
-      parent_revision_contents.merge!(fetched_parent_revision_contents)
-    else
-      (batch - fetched_parent_revision_contents.keys).each do |missing_parent_id|
-        diffs_not_analyzed << missing_parent_id
-      end
-    end
-  end
-
-  revision_contents.each do |revision_id, revision_data|
-    current_content = revision_data[:content]
-    parent_id = revision_data[:parentid]
-    parent_content = parent_revision_contents[parent_id][:content] if parent_id != 0
-
-    if current_content && parent_content
-      diff = analyze_diff(current_content, parent_content)
-      diffs[revision_id] = diff
-      accumulate_totals(diff, total)
-      diffs_analyzed_count += 1
-    else
-      diffs_not_analyzed << revision_id
-    end
-end
-
-
 
     {
       diffs_analyzed_count: diffs_analyzed_count,
@@ -164,10 +134,47 @@ end
       total[:claims_changed] += diff_data[:changed_claims]
   end
 
+# returns revision contents and parent contents for whole revision_ids array
+def self.handle_large_batchs(revision_ids)
+  puts "Handling large batchs"
+  puts revision_ids.length
+  revision_contents = {}
+  parent_contents = {}
+
+  revision_ids_batches = revision_ids.each_slice(500).to_a
+  puts "Number of batches"
+  puts revision_ids_batches.length
+  revision_ids_batches.each do |batch|
+    puts "Batch"
+    puts batch.length
+    contents = get_revision_contents(batch)
+    revision_contents.merge!(contents)
+
+    parent_ids = contents.values.map { |data| data[:parentid] }.compact
+    parent_contents_batch = get_revision_contents(parent_ids)
+    parent_contents.merge!(parent_contents_batch)
+  end
+
+  puts "revision_contents"
+  puts revision_contents.length
+  result = {}
+  revision_contents.each do |revid, data|
+    parentid = data[:parentid]
+    parent_content = parent_contents[parentid] if parentid
+    current = data ? data[:content] : nil
+    parent = parent_content ? parent_content[:content] : nil
+
+    result[revid] = { current_content: current, parent_content: parent }
+  end
+  result
+end
 
 def self.get_revision_contents(revision_ids)
   api_url = 'https://www.wikidata.org/w/api.php'
   client = MediawikiApi::Client.new(api_url)
+
+  # remove duplicates if revision_ids exists
+  revision_ids = revision_ids.uniq if revision_ids
 
   begin
     response = client.action(
@@ -186,17 +193,43 @@ def self.get_revision_contents(revision_ids)
 
     parsed_contents = {}
 
-    response.data['pages'].values.each do |page|
+    # checks if it has pages
+    if response.data['pages'].nil?
+      puts "No pages found in the response for revision IDs: #{revision_ids.join(', ')}"
+      return {}
+    end
+
+    puts "page count"
+    puts response.data['pages'].values.length
+    puts "page keys"
+    puts response.data['pages'].keys
+    # print revision count for each page 
+    # create a loop for this purpose only
+
+    puts "printing specific key info"
+    page = response.data['pages']["562024"]['revisions'].length
+    puts page
+
+
+    response.data['pages'].keys.each do |page|
+      puts "revisions count per page"
+      # puts the key of the page
+      page = response.data['pages'][page]
+
+      puts page['revisions'].length
       revisions = page['revisions']
       
       revisions.each do |revision|
         content = revision['slots']['main']['*']
         revid = revision['revid']
-        parentid = revision['parentid']
-        parsed_contents[revid] = {content: JSON.parse(content), parentid: parentid}
+        if revid == 0
+          parsed_contents[revid] = {content: nil, parentid: 0}
+        else
+          parentid = revision['parentid']
+          parsed_contents[revid] = {content: JSON.parse(content), parentid: parentid}
+        end
       end
     end
-
     return parsed_contents
   rescue MediawikiApi::ApiError => e
     puts "Error retrieving revision content: #{e.message}"
@@ -647,27 +680,26 @@ end
       parent_sitelinks = parent_content['sitelinks']
   
       # Check added sitelinks
-      if current_sitelinks
+      if current_sitelinks.respond_to?(:each)
         current_sitelinks.each do |site_key, current_sitelink|
-          unless parent_sitelinks&.key?(site_key)
+          unless parent_sitelinks.respond_to?(:key?) && parent_sitelinks.key?(site_key)
             added_sitelinks[site_key] = current_sitelink
           end
         end
       end
-  
+
       # Check removed sitelinks
-      if parent_sitelinks
+      if parent_sitelinks.respond_to?(:each)
         parent_sitelinks.each do |site_key, parent_sitelink|
-          unless current_sitelinks&.key?(site_key)
+          unless current_sitelinks.respond_to?(:key?) && current_sitelinks.key?(site_key)
             removed_sitelinks[site_key] = parent_sitelink
           end
         end
       end
-  
       # Check changed sitelinks
       if current_sitelinks && parent_sitelinks
         current_sitelinks.each do |site_key, current_sitelink|
-          if parent_sitelinks.key?(site_key)
+          if parent_sitelinks.respond_to?(:key?) && parent_sitelinks.key?(site_key)
             parent_sitelink = parent_sitelinks[site_key]
             if current_sitelink != parent_sitelink
               changed_sitelinks[site_key] = {
@@ -698,8 +730,9 @@ end
   end
 end
 
-revision_ids = [1780106722, 1903003546, 1902995129, 1596238100, 1898156691]
-revisions =[1780106722, 1903003546, 1902995129, 1596238100, 1898156691, 1895908644, 622872009, 1901195499, 1902995129, 1903003546, 1863882476, 535078533]
+revision_ids = [123, 456]
+revision_idss = [1780106722, 1903003546, 1902995129, 1596238100, 1898156691]
+revisions =[123, 456, 1780106722, 1596238100, 1898156691, 1895908644, 622872009, 1901195499, 1902995129, 1903003546, 1863882476, 535078533]
 # Test with your revision ids
 #puts WikidataDiffAnalyzer.analyze(revision_ids)
 # current = WikidataDiffAnalyzer.get_revision_content(1903003546)
