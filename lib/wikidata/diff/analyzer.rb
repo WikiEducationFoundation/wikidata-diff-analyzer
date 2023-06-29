@@ -41,9 +41,7 @@ module WikidataDiffAnalyzer
       diffs_not_analyzed << 0
     end
 
-    result = handle_large_batchs(revision_ids)
-
-    puts "Analyzing #{result.length} revisions"
+    result = handle_large_batches(revision_ids)
 
     # result is a hash which has contents like this:
     # result[revid] = { current_content: data[:content], parent_content: parent_content }
@@ -141,9 +139,8 @@ module WikidataDiffAnalyzer
   end
 
 # returns revision contents and parent contents for whole revision_ids array
-def self.handle_large_batchs(revision_ids)
-  puts "Handling large batchs"
-  puts revision_ids.length
+def self.handle_large_batches(revision_ids)
+  puts "Handling large batches"
   revision_contents = {}
   parent_contents = {}
 
@@ -163,14 +160,12 @@ def self.handle_large_batchs(revision_ids)
     end
   end
 
-  
   result = {}
   revision_contents.each do |revid, data|
     parentid = data[:parentid]
     parent_content = parent_contents[parentid] if parentid
     current = data ? data[:content] : nil
     parent = parent_content ? parent_content[:content] : nil
-
     result[revid] = { current_content: current, parent_content: parent }
   end
   result
@@ -208,22 +203,10 @@ def self.get_revision_contents(revision_ids)
 
     puts "page count"
     puts response.data['pages'].values.length
-    puts "page keys"
-    puts response.data['pages'].keys
-    # print revision count for each page 
-    # create a loop for this purpose only
-
-    puts "printing specific key info"
-    page = response.data['pages']["562024"]['revisions'].length
-    puts page
 
 
     response.data['pages'].keys.each do |page|
-      puts "revisions count per page"
-      # puts the key of the page
       page = response.data['pages'][page]
-
-      puts page['revisions'].length
       revisions = page['revisions']
       
       revisions.each do |revision|
@@ -248,70 +231,70 @@ def self.get_revision_contents(revision_ids)
 end
 
   
-# This method retrieves the content of a specific revision from the Wikidata API.
-# It takes a revision ID as input and returns the parsed content as a Ruby object.
-  def self.get_revision_content(revision_id)
-    # in case of the first revision, there is no parent revision
-    # currently we are not handling this case
-    if revision_id.nil?
-      return nil
-    end
+# # This method retrieves the content of a specific revision from the Wikidata API.
+# # It takes a revision ID as input and returns the parsed content as a Ruby object.
+#   def self.get_revision_content(revision_id)
+#     # in case of the first revision, there is no parent revision
+#     # currently we are not handling this case
+#     if revision_id.nil?
+#       return nil
+#     end
 
-    api_url = 'https://www.wikidata.org/w/api.php'
+#     api_url = 'https://www.wikidata.org/w/api.php'
 
-    client = MediawikiApi::Client.new(api_url)
-    begin
-      response = client.action(
-        'query',
-        prop: 'revisions',
-        revids: revision_id,
-        rvslots: 'main',
-        rvprop: 'content',
-        format: 'json'
-      )
+#     client = MediawikiApi::Client.new(api_url)
+#     begin
+#       response = client.action(
+#         'query',
+#         prop: 'revisions',
+#         revids: revision_id,
+#         rvslots: 'main',
+#         rvprop: 'content',
+#         format: 'json'
+#       )
 
-      if response.nil?
-        puts "No response received for revision ID: #{revision_id}"
-        return nil
-      end
-      # Get the page ID and revisions from the response
-      page_id = response.data['pages'].keys.first
-      revisions = response.data['pages'][page_id]['revisions']
-      first_revision = revisions[0]
+#       if response.nil?
+#         puts "No response received for revision ID: #{revision_id}"
+#         return nil
+#       end
+#       # Get the page ID and revisions from the response
+#       page_id = response.data['pages'].keys.first
+#       revisions = response.data['pages'][page_id]['revisions']
+#       first_revision = revisions[0]
 
-      # Get the content of the first revision
-      content = first_revision['slots']['main']['*']
+#       # Get the content of the first revision
+#       content = first_revision['slots']['main']['*']
 
-      # Parse the content as JSON
-      parsed_content = JSON.parse(content)
+#       # Parse the content as JSON
+#       parsed_content = JSON.parse(content)
 
-      # Return the parsed content
-      return parsed_content
-    rescue MediawikiApi::ApiError => e
-      puts "Error retrieving revision content: #{e.message}"
-      return nil
-    rescue JSON::ParserError => e
-      puts "Error parsing JSON content: #{e.message}"
-      puts "Content: #{content}"
-      raise e
-    end
-  end
+#       # Return the parsed content
+#       return parsed_content
+#     rescue MediawikiApi::ApiError => e
+#       puts "Error retrieving revision content: #{e.message}"
+#       return nil
+#     rescue JSON::ParserError => e
+#       puts "Error parsing JSON content: #{e.message}"
+#       puts "Content: #{content}"
+#       raise e
+#     end
+#   end
 
-   # Gets the parent id based on current revision id from the action:compare at Wikidata API.
-   def self.get_parent_id(current_revision_id)
-    client = MediawikiApi::Client.new('https://www.wikidata.org/w/api.php')
-    response = client.action('compare', fromrev: current_revision_id, torelative: 'prev', format: 'json')
-    data = response.data
-    if data
-      if data['fromrevid'].nil?
-        return nil
-      end
-      parent_id = data['fromrevid']
-      return parent_id
-    else
-      return nil
-    end
-  end
+#    # Gets the parent id based on current revision id from the action:compare at Wikidata API.
+#    def self.get_parent_id(current_revision_id)
+#     client = MediawikiApi::Client.new('https://www.wikidata.org/w/api.php')
+#     response = client.action('compare', fromrev: current_revision_id, torelative: 'prev', format: 'json')
+#     data = response.data
+#     if data
+#       if data['fromrevid'].nil?
+#         return nil
+#       end
+#       parent_id = data['fromrevid']
+#       return parent_id
+#     else
+#       return nil
+#     end
+#   end
 
   def self.isolate_claim_differences(current_content, parent_content)
     # Initialize empty arrays to store the added, removed, and changed claims
