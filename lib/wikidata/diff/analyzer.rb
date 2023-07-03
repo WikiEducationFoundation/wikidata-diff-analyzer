@@ -9,6 +9,7 @@ module WikidataDiffAnalyzer
   # This method analyzes a set of revision ids and returns the differences between them.
   def self.analyze(revision_ids)
     diffs_analyzed_count = 0
+    diffs_analyzed = []
     diffs_not_analyzed = []
     diffs = {}
     total = {
@@ -35,13 +36,17 @@ module WikidataDiffAnalyzer
       sitelinks_changed: 0
     }
 
-    # if revision_ids has 0, then 0 can never be analyzed, so remove it and add in not analyzed
-    if revision_ids.include?(0)
-      revision_ids.delete(0)
-      diffs_not_analyzed << 0
-    end
+    # # if revision_ids has 0, then 0 can never be analyzed, so remove it and add in not analyzed
+    # if revision_ids.include?(0)
+    #   revision_ids.delete(0)
+    #   diffs_not_analyzed << 0
+    # end
 
     result = handle_large_batches(revision_ids)
+
+    #if returned_result[:diff_not_analyzed]
+      #diffs_not_analyzed += returned_result[:diff_not_analyzed]
+    #end
 
     # result is a hash which has contents like this:
     # result[revid] = { current_content: data[:content], parent_content: parent_content }
@@ -53,11 +58,15 @@ module WikidataDiffAnalyzer
         diff = analyze_diff(current_content, parent_content)
         diffs[revision_id] = diff
         accumulate_totals(diff, total)
+        diffs_analyzed << revision_id
         diffs_analyzed_count += 1
-      else
-        diffs_not_analyzed << revision_id
+      #else
+        #diffs_not_analyzed << revision_id
       end
     end
+
+    # adding the bad rev_ids to the not_analyzed list
+    diffs_not_analyzed = revision_ids - diffs_analyzed
 
     {
       diffs_analyzed_count: diffs_analyzed_count,
@@ -152,20 +161,21 @@ def self.handle_large_batches(revision_ids)
     puts "Batch"
     puts batch.length
     puts "callng get_revision_contents for revision content"
-    contents = get_revision_contents(batch)
+    # save the contents of the revisions and diff_not_analyzed from the result
+    parsed_contents = get_revision_contents(batch)
+
     puts "revision content length"
-    puts contents.length
+    puts parsed_contents.length
     # merge if not nil
-    if contents
+    if parsed_contents
       parent_ids = []
-      revision_contents.merge!(contents)
+      revision_contents.merge!(parsed_contents)
       # parent_ids = contents.values.map { |data| data[:parentid] }.compact
-      contents.values.each do |data|
+      parsed_contents.values.each do |data|
         parent_id = data[:parentid]
         
         if parent_id.nil?
           puts "parent_id is nil"
-          puts data[:revid]
         else
           parent_ids << parent_id
         end
@@ -193,11 +203,7 @@ def self.get_revision_contents(revision_ids)
 
   # remove duplicates if revision_ids exists
   # check if duplicate revision_ids exist and print if exists
-
-  puts revision_ids.length
   revision_ids = revision_ids.uniq if revision_ids
-  puts "after deduplication"
-  puts revision_ids.length
 
   begin
     response = client.action(
@@ -222,28 +228,21 @@ def self.get_revision_contents(revision_ids)
       return nil
     end
 
-    puts "Number of pages inside response"
-    puts response.data['pages'].length
-
     response.data['pages'].keys.each do |page|
       page = response.data['pages'][page]
       revisions = page['revisions']
-      puts "Number of revisions inside response"
-      puts revisions.length
-
       revisions.each do |revision|
-        content = revision['slots']['main']['*']
-        revid = revision['revid']
-        puts "Revision ID: #{revid}"
-        if revid == 0
-          parsed_contents[revid] = {content: nil, parentid: 0}
+        if revision['slots']['main']['contentmodel'] != 'wikibase-item'
+          puts "Content model is not wikibase-item"
         else
+          content = revision['slots']['main']['*']
+          revid = revision['revid']
           parentid = revision['parentid']
           parsed_contents[revid] = {content: JSON.parse(content), parentid: parentid}
         end
       end
     end
-    return parsed_contents
+    parsed_contents
   rescue MediawikiApi::ApiError => e
     puts "Error retrieving revision content: #{e.message}"
     return {}
@@ -799,6 +798,7 @@ end
   end
 end
 
+edge = [0, 123, 456, 1803628651]
 revision_ids = [1765004817]
 revision_idss = [1780106722, 1903003546, 1902995129, 1596238100, 1898156691]
 revisions =[0, 123, 456, 1780106722, 1596238100, 1898156691, 1895908644, 622872009, 1901195499, 1902995129, 1903003546, 1863882476, 535078533]
@@ -812,11 +812,11 @@ revisions =[0, 123, 456, 1780106722, 1596238100, 1898156691, 1895908644, 6228720
 
 
 # Generate an array of 500 random revision IDs
-random_revids = Array.new(50) { rand(1_000_000_000..2_000_000_000) }
-puts random_revids
+random_revids = Array.new(100) { rand(1_000_000_000..2_000_000_000) }
 # Analyze the revisions
 contents = WikidataDiffAnalyzer.analyze(random_revids)
+puts "final result"
 puts contents[:diffs_analyzed_count]
 puts contents[:diffs_not_analyzed]
-
+puts contents[:total]
 
