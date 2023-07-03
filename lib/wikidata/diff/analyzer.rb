@@ -144,17 +144,33 @@ def self.handle_large_batches(revision_ids)
   revision_contents = {}
   parent_contents = {}
 
+
   revision_ids_batches = revision_ids.each_slice(50).to_a
   puts "Number of batches"
   puts revision_ids_batches.length
   revision_ids_batches.each do |batch|
     puts "Batch"
     puts batch.length
+    puts "callng get_revision_contents for revision content"
     contents = get_revision_contents(batch)
+    puts "revision content length"
+    puts contents.length
     # merge if not nil
     if contents
+      parent_ids = []
       revision_contents.merge!(contents)
-      parent_ids = contents.values.map { |data| data[:parentid] }.compact
+      # parent_ids = contents.values.map { |data| data[:parentid] }.compact
+      contents.values.each do |data|
+        parent_id = data[:parentid]
+        
+        if parent_id.nil?
+          puts "parent_id is nil"
+          puts data[:revid]
+        else
+          parent_ids << parent_id
+        end
+      end
+      puts "callng get_revision_contents for parent_ids"
       parent_contents_batch = get_revision_contents(parent_ids)
       parent_contents.merge!(parent_contents_batch)
     end
@@ -206,11 +222,15 @@ def self.get_revision_contents(revision_ids)
       return nil
     end
 
+    puts "Number of pages inside response"
+    puts response.data['pages'].length
 
     response.data['pages'].keys.each do |page|
       page = response.data['pages'][page]
       revisions = page['revisions']
-      
+      puts "Number of revisions inside response"
+      puts revisions.length
+
       revisions.each do |revision|
         content = revision['slots']['main']['*']
         revid = revision['revid']
