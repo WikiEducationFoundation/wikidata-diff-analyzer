@@ -36,18 +36,13 @@ module WikidataDiffAnalyzer
       sitelinks_changed: 0
     }
 
-    # # if revision_ids has 0, then 0 can never be analyzed, so remove it and add in not analyzed
-    # if revision_ids.include?(0)
-    #   revision_ids.delete(0)
-    #   diffs_not_analyzed << 0
-    # end
+    # if revision_ids has 0, then 0 can never be analyzed, so remove it and add in not analyzed
+    if revision_ids.include?(0)
+      revision_ids.delete(0)
+      diffs_not_analyzed << 0
+    end
 
     result = handle_large_batches(revision_ids)
-
-    #if returned_result[:diff_not_analyzed]
-      #diffs_not_analyzed += returned_result[:diff_not_analyzed]
-    #end
-
     # result is a hash which has contents like this:
     # result[revid] = { current_content: data[:content], parent_content: parent_content }
 
@@ -66,7 +61,7 @@ module WikidataDiffAnalyzer
     end
 
     # adding the bad rev_ids to the not_analyzed list
-    diffs_not_analyzed = revision_ids - diffs_analyzed
+    diffs_not_analyzed += revision_ids - diffs_analyzed
 
     {
       diffs_analyzed_count: diffs_analyzed_count,
@@ -169,20 +164,19 @@ def self.handle_large_batches(revision_ids)
     # merge if not nil
     if parsed_contents
       parent_ids = []
-      revision_contents.merge!(parsed_contents)
-      # parent_ids = contents.values.map { |data| data[:parentid] }.compact
+      revision_contents.merge!(parsed_contents) if parsed_contents
       parsed_contents.values.each do |data|
         parent_id = data[:parentid]
         
-        if parent_id.nil?
-          puts "parent_id is nil"
+        if parent_id == 0 || parent_id.nil?
+          puts "parent_id is 0 or nil"
+          puts data[:revid]
         else
           parent_ids << parent_id
         end
       end
-      puts "callng get_revision_contents for parent_ids"
       parent_contents_batch = get_revision_contents(parent_ids)
-      parent_contents.merge!(parent_contents_batch)
+      parent_contents.merge!(parent_contents_batch) if parent_contents_batch
     end
   end
 
@@ -203,6 +197,7 @@ def self.get_revision_contents(revision_ids)
 
   # remove duplicates if revision_ids exists
   # check if duplicate revision_ids exist and print if exists
+
   revision_ids = revision_ids.uniq if revision_ids
 
   begin
@@ -231,18 +226,23 @@ def self.get_revision_contents(revision_ids)
     response.data['pages'].keys.each do |page|
       page = response.data['pages'][page]
       revisions = page['revisions']
+
       revisions.each do |revision|
         if revision['slots']['main']['contentmodel'] != 'wikibase-item'
           puts "Content model is not wikibase-item"
         else
           content = revision['slots']['main']['*']
           revid = revision['revid']
-          parentid = revision['parentid']
-          parsed_contents[revid] = {content: JSON.parse(content), parentid: parentid}
+          if revid == 0
+            parsed_contents[revid] = {content: nil, parentid: 0}
+          else
+            parentid = revision['parentid']
+            parsed_contents[revid] = {content: JSON.parse(content), parentid: parentid}
+          end
         end
       end
     end
-    parsed_contents
+    return parsed_contents
   rescue MediawikiApi::ApiError => e
     puts "Error retrieving revision content: #{e.message}"
     return {}
@@ -812,7 +812,8 @@ revisions =[0, 123, 456, 1780106722, 1596238100, 1898156691, 1895908644, 6228720
 
 
 # Generate an array of 500 random revision IDs
-random_revids = Array.new(100) { rand(1_000_000_000..2_000_000_000) }
+random_revids = Array.new(50) { rand(1_000_000_000..2_000_000_000) }
+puts random_revids
 # Analyze the revisions
 contents = WikidataDiffAnalyzer.analyze(random_revids)
 puts "final result"
