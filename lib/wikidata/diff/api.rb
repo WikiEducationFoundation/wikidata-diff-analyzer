@@ -41,6 +41,8 @@ class Api
             revisions.each do |revision|
             if revision['slots']['main']['contentmodel'] != 'wikibase-item'
                 puts "Content model is not wikibase-item"
+                # include the revision ids that are not wikibase-item
+                puts "Revision ID #{revision['revid']} is a #{revision['slots']['main']['contentmodel']}"
             else
                 content = revision['slots']['main']['*']
                 revid = revision['revid']
