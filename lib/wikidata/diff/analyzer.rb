@@ -2,6 +2,7 @@
 require_relative 'large_batches_analyzer'
 require_relative 'revision_analyzer'
 require_relative 'total'
+require_relative 'mediawiki_login'
 
 module WikidataDiffAnalyzer
   class Error < StandardError; end
@@ -41,6 +42,14 @@ module WikidataDiffAnalyzer
       revision_ids.delete(0)
       diffs_not_analyzed << 0
     end
+    # # if mediawiki can be logged in call for 500, otherwise call for 50
+    # if MediawikiLogin.mediawiki_login
+    #   puts 'Logged in to mediawiki'
+    #   result = LargeBatchesAnalyzer.handle_large_batches(revision_ids, 500)
+    # else
+    #   puts 'Not logged in to mediawiki'
+    #   result = LargeBatchesAnalyzer.handle_large_batches(revision_ids, 50)
+    # end
 
     result = LargeBatchesAnalyzer.handle_large_batches(revision_ids, 50)
     # result is a hash which has contents like this:
@@ -75,12 +84,12 @@ end
 # revision_idss = [1780106722, 1903003546, 1902995129, 1596238100, 1898156691]
 # revisions =[0, 123, 456, 1780106722, 1596238100, 1898156691, 1895908644, 622872009, 1901195499, 1902995129, 1903003546, 1863882476, 535078533]
 
-# # Generate an array of 500 random revision IDs
-# random_revids = Array.new(50) { rand(1_000_000_000..2_000_000_000) }
-# # Analyze the revisions
-# contents = WikidataDiffAnalyzer.analyze(random_revids)
-# puts "final result"
-# puts contents[:diffs_analyzed_count]
-# puts contents[:diffs_not_analyzed]
-# puts contents[:total]
+# Generate an array of 500 random revision IDs
+random_revids = Array.new(500) { rand(1_000_000_000..2_000_000_000) }
+# Analyze the revisions
+contents = WikidataDiffAnalyzer.analyze(random_revids)
+puts "final result"
+puts contents[:diffs_analyzed_count]
+puts contents[:diffs_not_analyzed]
+puts contents[:total]
 
