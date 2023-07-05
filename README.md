@@ -1,20 +1,22 @@
 # WikidataDiffAnalyzer
 
-Welcome to WikidataDiffAnalyzer! The WikidataDiffAnalyzer is a Ruby gem that provides functionality to parse the differences between Wikidata revisions and extract statistics about the changes. It enables accurate analysis of Wikidata edits, such as counting the number of qualifiers added, references added, and other relevant statistics. This gem has been developed to enhance Wikidata statistics on the Wiki Education Dashboard and Programs & Events Dashboard, but it can be utilized for various other purposes as well.
+Welcome to WikidataDiffAnalyzer(Alpha Version)! The WikidataDiffAnalyzer is a Ruby gem that provides functionality to parse the differences between Wikidata revisions and extract statistics about the changes. It enables accurate analysis of Wikidata edits, such as counting the number of claims, qualifiers, references, aliases, labels, descriptions and site-links added, removed, and changed. This gem has been developed to enhance Wikidata statistics on the Wiki Education Dashboard and Programs & Events Dashboard, but it can be utilized for various other purposes as well.
 
 ## Installation
 
 To install the WikidataDiffAnalyzer gem, add it to your Gemfile:
-   `$ gem 'wikidata_diff_analyzer'`
+   ```$ gem 'wikidata_diff_analyzer'```
 
 Then, run the following command:
-    `$ bundle install`
+    ```$ bundle install```
 
 Alternatively, you can install it directly via:
-`$ gem install wikidata_diff_analyzer`
+```$ gem install wikidata_diff_analyzer```
 
 ## Usage
 The main method of this gem is `WikidataDiffAnalyzer.analyze`, which receives an array of revision IDs and provides a comprehensive analysis of the differences among them.
+
+**The input should be an array of integers**. Only the valid revision ids containing wikidata-item revisions and having a parent revision will be analyzed. Other revision ids (such as invalid revision IDs, revision IDs having no parent id/ deleted parent id, and revision ids having revisions of wikitext or lexeme) will be returned as not-analyzed in this version.
 
 You can look at the HTML version of the difference between the edits with their parent revision below:
 - 0 (does not exist)
@@ -162,15 +164,10 @@ Here's the full output structure:
 ```
 
 
-## Development
-
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
-
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/wikidata-diff-analyzer. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/[USERNAME]/wikidata-diff-analyzer/blob/master/CODE_OF_CONDUCT.md).
+Bug reports and pull requests are welcome on GitHub at [https://github.com/WikiEducationFoundation/wikidata-diff-analyzer](https://github.com/WikiEducationFoundation/wikidata-diff-analyzer). This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/WikiEducationFoundation/wikidata-diff-analyzer/blob/master/CODE_OF_CONDUCT.md).
 
 ## License
 
@@ -178,4 +175,4 @@ The gem is available as open source under the terms of the [MIT License](https:/
 
 ## Code of Conduct
 
-Everyone interacting in the Wikidata::Diff::Analyzer project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/wikidata-diff-analyzer/blob/master/CODE_OF_CONDUCT.md).
+Everyone interacting in the WikidataDiffAnalyzer project's codebases, issue trackers, chat rooms, and mailing lists is expected to follow the [code of conduct](https://github.com/WikiEducationFoundation/wikidata-diff-analyzer/blob/master/CODE_OF_CONDUCT.md).
