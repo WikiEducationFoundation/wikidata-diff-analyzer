@@ -16,8 +16,9 @@ Alternatively, you can install it directly via:
 ## Usage
 The main method of this gem is `WikidataDiffAnalyzer.analyze`, which receives an array of revision IDs and provides a comprehensive analysis of the differences among them.
 
-**The input should be an array of integers**. Only the valid revision ids containing wikidata-item revisions and having a parent revision will be analyzed. Other revision ids (such as invalid revision IDs, revision IDs having no parent id/ deleted parent id, and revision ids having revisions of wikitext or lexeme) will be returned as not-analyzed in this version.
+**The input should be an array of integers**. Only the valid revision ids containing wikidata-item revisions and having a parent revision will be analyzed. Other revision ids (such as invalid revision IDs, revision IDs having no parent id/ deleted parent IDs, and revision ids having revisions of wikitext or lexeme) will be returned as not-analyzed in this version.
 
+Let's look at an example with some real revision ids -
 You can look at the HTML version of the difference between the edits with their parent revision below:
 - 0 (does not exist)
 - [123](https://www.wikidata.org/w/index.php?&diff=123) (No parent revision, is not analyzed)
@@ -40,8 +41,8 @@ The output is a hash including the information below:
 {
   diffs_analyzed_count: 3,
   diffs_not_analyzed: [0, 123],
-  diffs: {1780106722: {...}, 1903003546: {...}, 1902995129: {...}},
-  total: {claims_added: 0, claims_removed: 1, claims_changed: 3 ...}
+  diffs: {622872009: {...}, 1903003546: {...}, 1902995129: {...}},
+  total: {claims_added: 1, claims_removed: 1, claims_changed: 1 ...}
 }
 
 ```
