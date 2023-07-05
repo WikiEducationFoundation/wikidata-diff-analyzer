@@ -138,11 +138,11 @@ Here's the full output structure:
 }
 # the total stats of all diffs
 {
-  :claims_added=>0,
+  :claims_added=>1,
   :claims_removed=>1,
-  :claims_changed=>3,
-  :references_added=>1,
-  :references_removed=>2,
+  :claims_changed=>1,
+  :references_added=>0,
+  :references_removed=>1,
   :references_changed=>0,
   :qualifiers_added=>1,
   :qualifiers_removed=>1,
@@ -160,6 +160,7 @@ Here's the full output structure:
   :sitelinks_removed=>0,
   :sitelinks_changed=>0
 }
+
 
 ```
 
