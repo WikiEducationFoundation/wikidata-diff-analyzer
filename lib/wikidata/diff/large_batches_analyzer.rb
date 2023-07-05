@@ -8,7 +8,6 @@ class LargeBatchesAnalyzer
     
     
         revision_ids_batches = revision_ids.each_slice(batch_size).to_a
-        puts "Handling revision_ids_batches: #{revision_ids_batches.length}"
         revision_ids_batches.each do |batch|
             parsed_contents = Api.get_revision_contents(batch)
             if parsed_contents

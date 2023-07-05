@@ -30,8 +30,8 @@ Gem::Specification.new do |spec|
   spec.bindir = "exe"
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
+  spec.files.reject! { |f| File.extname(f) == '.gem' }
 
   # Adding the dependencies
-  spec.add_dependency 'json'
-  spec.add_dependency 'open-uri'
+  spec.add_dependency 'json', '~> 2.1'
 end

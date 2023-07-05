@@ -79,21 +79,5 @@ module WikidataDiffAnalyzer
   end
 end
 
-# edge = [0, 123, 456, 1803628651]
-# revision_ids = [1765004817]
-# revision_idss = [1780106722, 1903003546, 1902995129, 1596238100, 1898156691]
-# revisions =[0, 123, 456, 1780106722, 1596238100, 1898156691, 1895908644, 622872009, 1901195499, 1902995129, 1903003546, 1863882476, 535078533]
-
-# Generate an array of 500 random revision IDs
-random_revids = Array.new(500) { rand(1_000_000_000..2_000_000_000) }
-example = [0, 123, 622872009, 1903003546, 1902995129]
-# Analyze the revisions
-result = WikidataDiffAnalyzer.analyze(example)
-puts "final result"
-puts result[:diffs_analyzed_count]  # Prints the count of analyzed diffs
-puts result[:diffs_not_analyzed]     # Prints the list of revision IDs not analyzed
-puts result[:diffs]                  # Prints the detailed analysis of each diff (Key is the revision ID)
-puts result[:total]                  # Prints the total stats of all diffs
-
 
 

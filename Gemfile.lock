@@ -2,14 +2,12 @@ PATH
   remote: .
   specs:
     wikidata-diff-analyzer (0.1.0)
-      json
-      open-uri
+      json (~> 2.1)
 
 GEM
   remote: https://rubygems.org/
   specs:
     ast (2.4.2)
-    date (3.3.3)
     diff-lcs (1.5.0)
     domain_name (0.5.20190701)
       unf (>= 0.0.5, < 1.0.0)
@@ -29,10 +27,6 @@ GEM
       faraday-cookie_jar (~> 0.0, >= 0.0.6)
       faraday_middleware (~> 0.10, >= 0.10.0)
     multipart-post (2.3.0)
-    open-uri (0.3.0)
-      stringio
-      time
-      uri
     parallel (1.23.0)
     parser (3.2.2.1)
       ast (~> 2.4.1)
@@ -66,14 +60,10 @@ GEM
     rubocop-ast (1.28.1)
       parser (>= 3.2.1.0)
     ruby-progressbar (1.13.0)
-    stringio (3.0.6)
-    time (0.2.2)
-      date
     unf (0.1.4)
       unf_ext
     unf_ext (0.0.8.2)
     unicode-display_width (2.4.2)
-    uri (0.12.1)
 
 PLATFORMS
   x86_64-linux
