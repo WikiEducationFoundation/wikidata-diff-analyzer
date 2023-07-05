@@ -86,10 +86,14 @@ end
 
 # Generate an array of 500 random revision IDs
 random_revids = Array.new(500) { rand(1_000_000_000..2_000_000_000) }
+example = [0, 123, 622872009, 1903003546, 1902995129]
 # Analyze the revisions
-contents = WikidataDiffAnalyzer.analyze(random_revids)
+result = WikidataDiffAnalyzer.analyze(example)
 puts "final result"
-puts contents[:diffs_analyzed_count]
-puts contents[:diffs_not_analyzed]
-puts contents[:total]
+puts result[:diffs_analyzed_count]  # Prints the count of analyzed diffs
+puts result[:diffs_not_analyzed]     # Prints the list of revision IDs not analyzed
+puts result[:diffs]                  # Prints the detailed analysis of each diff (Key is the revision ID)
+puts result[:total]                  # Prints the total stats of all diffs
+
+
 
