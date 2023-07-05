@@ -34,7 +34,13 @@ module WikidataDiffAnalyzer
       descriptions_changed: 0,
       sitelinks_added: 0,
       sitelinks_removed: 0,
-      sitelinks_changed: 0
+      sitelinks_changed: 0,
+      merge_to: 0,
+      merge_from: 0,
+      redirect: 0,
+      undo: 0,
+      restore: 0,
+      clear_item: 0
     }
 
     # if revision_ids has 0, then 0 can never be analyzed, so remove it and add in not analyzed
@@ -58,8 +64,9 @@ module WikidataDiffAnalyzer
     result.each do |revision_id, revision_data|
       current_content = revision_data[:current_content]
       parent_content = revision_data[:parent_content]
-      if current_content && parent_content
-        diff = RevisionAnalyzer.analyze_diff(current_content, parent_content)
+      comment = revision_data[:comment]
+      if current_content && parent_content && comment
+        diff = RevisionAnalyzer.analyze_diff(current_content, parent_content, comment)
         diffs[revision_id] = diff
         Total.accumulate_totals(diff, total)
         diffs_analyzed << revision_id
@@ -79,5 +86,11 @@ module WikidataDiffAnalyzer
   end
 end
 
-
+random_revids = Array.new(50) { rand(1_000_000_000..2_000_000_000) }
+# Analyze the revisions
+contents = WikidataDiffAnalyzer.analyze(random_revids)
+puts "final result"
+puts contents[:diffs_analyzed_count]
+puts contents[:diffs_not_analyzed]
+puts contents[:total]
 

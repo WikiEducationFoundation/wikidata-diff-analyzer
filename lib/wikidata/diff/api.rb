@@ -17,7 +17,7 @@ class Api
             prop: 'revisions',
             revids: revision_ids.join('|'),
             rvslots: 'main',
-            rvprop: 'content|ids',
+            rvprop: 'content|ids|comment',
             format: 'json'
         )
 
@@ -46,11 +46,12 @@ class Api
             else
                 content = revision['slots']['main']['*']
                 revid = revision['revid']
+                comment = revision['comment']
                 if revid == 0
-                    parsed_contents[revid] = {content: nil, parentid: 0}
+                    parsed_contents[revid] = {content: nil, comment: nil, parentid: 0}
                 else
                     parentid = revision['parentid']
-                    parsed_contents[revid] = {content: JSON.parse(content), parentid: parentid}
+                    parsed_contents[revid] = {content: JSON.parse(content), comment: comment, parentid: parentid}
                 end
             end
             end
