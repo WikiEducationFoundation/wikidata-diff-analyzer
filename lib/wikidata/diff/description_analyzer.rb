@@ -24,26 +24,26 @@ class DescriptionAnalyzer
 
         # Iterate over each language in the current descriptions
         (current_descriptions || {}).each do |lang, current_description|
-        parent_description = parent_descriptions[lang]
-    
-        if parent_description.nil?
-            added_descriptions << { lang: lang }
-        elsif current_description != parent_description
-            changed_descriptions << { lang: lang }
-        end
-        end
-    
-        # Iterate over each language in the parent descriptions to find removed descriptions
-        (parent_descriptions || {}).each do |lang, parent_description|
-        if current_descriptions[lang].nil?
-            removed_descriptions << { lang: lang }
-        end
+            parent_description = parent_descriptions[lang]
+        
+            if parent_description.nil?
+                added_descriptions << { lang: lang }
+            elsif current_description != parent_description
+                changed_descriptions << { lang: lang }
+            end
+            end
+        
+            # Iterate over each language in the parent descriptions to find removed descriptions
+            (parent_descriptions || {}).each do |lang, parent_description|
+            if current_descriptions[lang].nil?
+                removed_descriptions << { lang: lang }
+            end
         end
     
         {
-        changed: changed_descriptions,
-        removed: removed_descriptions,
-        added: added_descriptions
+            changed: changed_descriptions,
+            removed: removed_descriptions,
+            added: added_descriptions
         }
     end
 end

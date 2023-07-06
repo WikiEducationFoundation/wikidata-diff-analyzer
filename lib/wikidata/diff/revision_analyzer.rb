@@ -3,10 +3,11 @@ require_relative 'alias_analyzer'
 require_relative 'label_analyzer'
 require_relative 'description_analyzer'
 require_relative 'sitelink_analyzer'
+require_relative 'comment_analyzer'
 
 class RevisionAnalyzer
   # This method takes two revisions as input and returns the differences between them.
-  def self.analyze_diff(current_content, parent_content)
+  def self.analyze_diff(current_content, parent_content, comment)
       diff = {}
       # Calculate claim differences includes references and qualifiers
       claim_diff = ClaimAnalyzer.isolate_claim_differences(current_content, parent_content)
@@ -44,6 +45,15 @@ class RevisionAnalyzer
       diff[:added_sitelinks] = sitelink_diff[:added].length
       diff[:removed_sitelinks] = sitelink_diff[:removed].length
       diff[:changed_sitelinks] = sitelink_diff[:changed].length
+
+
+      phrases = CommentAnalyzer.isolate_comment_differences(comment)
+      diff[:merge_to] = phrases[:merge_to]
+      diff[:merge_from] = phrases[:merge_from]
+      diff[:redirect] = phrases[:redirect]
+      diff[:undo] = phrases[:undo]
+      diff[:restore] = phrases[:restore]
+      diff[:clear_item] = phrases[:clear_item]
 
       diff
   end

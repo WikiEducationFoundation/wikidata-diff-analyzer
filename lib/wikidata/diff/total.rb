@@ -21,5 +21,11 @@ class Total
         total[:sitelinks_added] += diff_data[:added_sitelinks]
         total[:sitelinks_removed] += diff_data[:removed_sitelinks]
         total[:sitelinks_changed] += diff_data[:changed_sitelinks]
+        total[:merge_from] += diff_data[:merge_from]
+        total[:merge_to] += diff_data[:merge_to]
+        total[:undo] += diff_data[:undo]
+        total[:restore] += diff_data[:restore]
+        total[:clear_item] += diff_data[:clear_item]
+        total[:redirect] += diff_data[:redirect]
     end
 end

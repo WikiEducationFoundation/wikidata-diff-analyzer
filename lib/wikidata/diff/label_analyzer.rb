@@ -24,25 +24,21 @@ class LabelAnalyzer
     
         # Iterate over each language in the current labels
         (current_labels || {}).each do |lang, current_label|
-        parent_label = parent_labels[lang]
-    
-        if parent_label.nil?
-            added_labels << { lang: lang }
-        elsif current_label != parent_label
-            changed_labels << { lang: lang }
+            parent_label = parent_labels[lang]
+        
+            if parent_label.nil?
+                added_labels << { lang: lang }
+            elsif current_label != parent_label
+                changed_labels << { lang: lang }
+            end
+            end
+        
+            # Iterate over each language in the parent labels to find removed labels
+            (parent_labels || {}).each do |lang, parent_label|
+            if current_labels[lang].nil?
+                removed_labels << { lang: lang }
+            end
         end
-        end
-    
-        # Iterate over each language in the parent labels to find removed labels
-        (parent_labels || {}).each do |lang, parent_label|
-        if current_labels[lang].nil?
-            removed_labels << { lang: lang }
-        end
-        end
-
-        # puts "Changed labels: #{changed_labels}"
-        # puts "Removed labels: #{removed_labels}"
-        # puts "Added labels: #{added_labels}"
     
         {
         changed: changed_labels,
