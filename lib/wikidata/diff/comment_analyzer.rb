@@ -1,5 +1,6 @@
 class CommentAnalyzer
     def self.isolate_comment_differences(comment)
+
     phrases = {
         'merge_to': 0,
         'merge_from': 0,
@@ -8,6 +9,10 @@ class CommentAnalyzer
         'restore': 0,
         'clear_item': 0
     }
+
+    if comment.nil?
+        return phrases
+    end
 
     if comment.include?('wbmergeitems-from')
         phrases[:merge_from] = 1

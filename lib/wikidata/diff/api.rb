@@ -37,25 +37,41 @@ class Api
         response.data['pages'].keys.each do |page|
             page = response.data['pages'][page]
             revisions = page['revisions']
-
+          
             revisions.each do |revision|
-            if revision['slots']['main']['contentmodel'] != 'wikibase-item'
+              content_model = revision['slots']['main']['contentmodel']
+              if content_model != 'wikibase-item'
                 puts "Content model is not wikibase-item"
-                # include the revision ids that are not wikibase-item
-                puts "Revision ID #{revision['revid']} is a #{revision['slots']['main']['contentmodel']}"
-            else
-                content = revision['slots']['main']['*']
-                revid = revision['revid']
-                comment = revision['comment']
-                if revid == 0
-                    parsed_contents[revid] = {content: nil, comment: nil, parentid: 0}
+                puts "Revision ID #{revision['revid']} is a #{content_model}"
+              else
+                # checking if content has been deleted
+                if revision.key?('texthidden')
+                  puts "Content has been hidden or deleted"
+                  revid = revision['revid']
+                  parentid = revision['parentid']
+                  parsed_contents[revid] = { content: nil, comment: nil, parentid: parentid }
+                # checking if comment has been deleted
+                elsif revision.key?('commenthidden')
+                  puts "Comment has been hidden or deleted"
+                  revid = revision['revid']
+                  content = revision['slots']['main']['*']
+                  parentid = revision['parentid']
+                  parsed_contents[revid] = { content: JSON.parse(content), comment: nil, parentid: parentid }
                 else
-                    parentid = revision['parentid']
-                    parsed_contents[revid] = {content: JSON.parse(content), comment: comment, parentid: parentid}
+                  content = revision['slots']['main']['*']
+                  revid = revision['revid']
+                  comment = revision['comment']
+                  parentid = revision['parentid']
+                  if revid == 0
+                    parsed_contents[revid] = { content: nil, comment: nil, parentid: 0 }
+                  else
+                    parsed_contents[revid] = { content: JSON.parse(content), comment: comment, parentid: parentid }
+                  end
                 end
+              end
             end
-            end
-        end
+          end
+          
         return parsed_contents
         rescue MediawikiApi::ApiError => e
         puts "Error retrieving revision content: #{e.message}"
