@@ -47,10 +47,6 @@ class SitelinkAnalyzer
           # All sitelinks are removed if current content is nil
           removed_sitelinks = parent_content['sitelinks']
         end
-      
-        # puts "Added sitelinks: #{added_sitelinks}"
-        # puts "Removed sitelinks: #{removed_sitelinks}"
-        # puts "Changed sitelinks: #{changed_sitelinks}"
     
         {
           added: added_sitelinks,
