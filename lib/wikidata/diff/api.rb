@@ -62,8 +62,8 @@ class Api
                   revid = revision['revid']
                   comment = revision['comment']
                   parentid = revision['parentid']
-                  if revid == 0
-                    parsed_contents[revid] = { content: nil, comment: nil, parentid: 0 }
+                  if revid == 0 || revid.nil?
+                    parsed_contents[revid] = { content: nil, comment: nil, parentid: nil }
                   else
                     parsed_contents[revid] = { content: JSON.parse(content), comment: comment, parentid: parentid }
                   end
