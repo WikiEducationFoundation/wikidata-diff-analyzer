@@ -40,7 +40,8 @@ module WikidataDiffAnalyzer
       redirect: 0,
       undo: 0,
       restore: 0,
-      clear_item: 0
+      clear_item: 0,
+      create_item: 0
     }
 
     # if revision_ids has 0, then 0 can never be analyzed, so remove it and add in not analyzed
@@ -87,9 +88,3 @@ module WikidataDiffAnalyzer
     }
   end
 end
-
-first = [1016232717]
-
-random_revids = Array.new(500) { rand(1_000_000_000..2_000_000_000) }
-analyzed_revisions = WikidataDiffAnalyzer.analyze(first)
-puts analyzed_revisions

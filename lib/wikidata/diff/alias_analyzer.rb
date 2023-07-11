@@ -11,7 +11,7 @@ class AliasAnalyzer
         added_aliases = []
 
         current_aliases = (current_content['aliases'] || {}) if current_content
-        parent_aliases = (parent_content['aliases'] || {}) if parent_content
+        parent_aliases = (parent_content['aliases'] || {}) if parent_content 
 
     
         if current_aliases.is_a?(Array) || parent_aliases.is_a?(Array)

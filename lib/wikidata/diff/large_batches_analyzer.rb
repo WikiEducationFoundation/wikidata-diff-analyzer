@@ -9,8 +9,6 @@ class LargeBatchesAnalyzer
       
         revision_ids.each_slice(batch_size) do |batch|
           parent_ids = []
-          puts "batch"
-          puts batch.count
           parsed_contents = Api.get_revision_contents(batch)
           next unless parsed_contents
 
@@ -23,15 +21,10 @@ class LargeBatchesAnalyzer
             end
           end
           revision_contents.merge!(parsed_contents)
-          puts "parent ids count"
-          puts parent_ids.count
           parent_contents_batch = Api.get_revision_contents(parent_ids)
           parent_contents.merge!(parent_contents_batch) if parent_contents_batch
         end
 
-        puts "first revisions"
-        puts first_revisions    
-      
         build_result(revision_contents, parent_contents, first_revisions)
       end
       

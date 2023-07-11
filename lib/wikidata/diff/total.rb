@@ -26,6 +26,7 @@ class Total
         total[:undo] += diff_data[:undo]
         total[:restore] += diff_data[:restore]
         total[:clear_item] += diff_data[:clear_item]
+        total[:create_item] += diff_data[:create_item]
         total[:redirect] += diff_data[:redirect]
     end
 end

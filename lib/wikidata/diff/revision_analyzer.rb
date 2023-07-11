@@ -54,6 +54,7 @@ class RevisionAnalyzer
       diff[:undo] = phrases[:undo]
       diff[:restore] = phrases[:restore]
       diff[:clear_item] = phrases[:clear_item]
+      diff[:create_item] = phrases[:create_item]
 
       diff
   end
