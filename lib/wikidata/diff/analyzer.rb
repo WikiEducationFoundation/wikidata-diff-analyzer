@@ -40,7 +40,8 @@ module WikidataDiffAnalyzer
       redirect: 0,
       undo: 0,
       restore: 0,
-      clear_item: 0
+      clear_item: 0,
+      create_item: 0
     }
 
     # if revision_ids has 0, then 0 can never be analyzed, so remove it and add in not analyzed
@@ -65,7 +66,9 @@ module WikidataDiffAnalyzer
       current_content = revision_data[:current_content]
       parent_content = revision_data[:parent_content]
       comment = revision_data[:comment]
-      if current_content && parent_content
+      
+    
+      if current_content
         diff = RevisionAnalyzer.analyze_diff(current_content, parent_content, comment)
         diffs[revision_id] = diff
         Total.accumulate_totals(diff, total)
@@ -85,5 +88,3 @@ module WikidataDiffAnalyzer
     }
   end
 end
-
-
