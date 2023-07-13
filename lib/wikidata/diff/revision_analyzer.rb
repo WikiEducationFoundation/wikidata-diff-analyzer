@@ -4,58 +4,214 @@ require_relative 'label_analyzer'
 require_relative 'description_analyzer'
 require_relative 'sitelink_analyzer'
 require_relative 'comment_analyzer'
+require_relative 'form_analyzer'  
+require_relative 'sense_analyzer'
+require_relative 'lemma_analyzer'
+
 
 class RevisionAnalyzer
   # This method takes two revisions as input and returns the differences between them.
-  def self.analyze_diff(current_content, parent_content, comment)
+  def self.analyze_diff(revision_data)
+      model = revision_data[:model]
       diff = {}
-      # Calculate claim differences includes references and qualifiers
-      claim_diff = ClaimAnalyzer.isolate_claim_differences(current_content, parent_content)
-      diff[:added_claims] = claim_diff[:added_claims].length
-      diff[:removed_claims] = claim_diff[:removed_claims].length
-      diff[:changed_claims] = claim_diff[:changed_claims].length
-      diff[:added_references] = claim_diff[:added_references].length
-      diff[:removed_references] = claim_diff[:removed_references].length
-      diff[:changed_references] = claim_diff[:changed_references].length
-      diff[:added_qualifiers] = claim_diff[:added_qualifiers].length
-      diff[:removed_qualifiers] = claim_diff[:removed_qualifiers].length
-      diff[:changed_qualifiers] = claim_diff[:changed_qualifiers].length
-    
-      # Calculate alias differences
-      alias_diff = AliasAnalyzer.isolate_aliases_differences(current_content, parent_content)
-      diff[:added_aliases] = alias_diff[:added].length
-      diff[:removed_aliases] = alias_diff[:removed].length
-      diff[:changed_aliases] = alias_diff[:changed].length
-
-
-      # Calculate label differences
-      label_diff = LabelAnalyzer.isolate_labels_differences(current_content, parent_content)
-      diff[:added_labels] = label_diff[:added].length
-      diff[:removed_labels] = label_diff[:removed].length
-      diff[:changed_labels] = label_diff[:changed].length
-
-      # Calculate description differences
-      description_diff = DescriptionAnalyzer.isolate_descriptions_differences(current_content, parent_content)
-      diff[:added_descriptions] = description_diff[:added].length
-      diff[:removed_descriptions] = description_diff[:removed].length
-      diff[:changed_descriptions] = description_diff[:changed].length
-
-      # Calculate sitelink differences
-      sitelink_diff = SitelinkAnalyzer.isolate_sitelinks_differences(current_content, parent_content)
-      diff[:added_sitelinks] = sitelink_diff[:added].length
-      diff[:removed_sitelinks] = sitelink_diff[:removed].length
-      diff[:changed_sitelinks] = sitelink_diff[:changed].length
-
-
-      phrases = CommentAnalyzer.isolate_comment_differences(comment)
-      diff[:merge_to] = phrases[:merge_to]
-      diff[:merge_from] = phrases[:merge_from]
-      diff[:redirect] = phrases[:redirect]
-      diff[:undo] = phrases[:undo]
-      diff[:restore] = phrases[:restore]
-      diff[:clear_item] = phrases[:clear_item]
-      diff[:create_item] = phrases[:create_item]
-
+      if model == 'wikibase-item'
+        item(diff, revision_data)
+      elsif model == 'wikibase-property'
+        property(diff, revision_data)
+      elsif model == 'wikibase-lexeme'
+        lexeme(diff, revision_data)
+      end
       diff
+  end
+
+  def self.item(diff, revision_data)
+    current_content = revision_data[:current_content]
+    parent_content = revision_data[:parent_content]
+    comment = revision_data[:comment]
+    # Calculate claim differences includes references and qualifiers
+    claim_diff = ClaimAnalyzer.isolate_claim_differences(current_content, parent_content)
+    diff[:added_claims] = claim_diff[:added_claims].length
+    diff[:removed_claims] = claim_diff[:removed_claims].length
+    diff[:changed_claims] = claim_diff[:changed_claims].length
+    diff[:added_references] = claim_diff[:added_references].length
+    diff[:removed_references] = claim_diff[:removed_references].length
+    diff[:changed_references] = claim_diff[:changed_references].length
+    diff[:added_qualifiers] = claim_diff[:added_qualifiers].length
+    diff[:removed_qualifiers] = claim_diff[:removed_qualifiers].length
+    diff[:changed_qualifiers] = claim_diff[:changed_qualifiers].length
+  
+    # Calculate alias differences
+    alias_diff = AliasAnalyzer.isolate_aliases_differences(current_content, parent_content)
+    diff[:added_aliases] = alias_diff[:added].length
+    diff[:removed_aliases] = alias_diff[:removed].length
+    diff[:changed_aliases] = alias_diff[:changed].length
+
+
+    # Calculate label differences
+    label_diff = LabelAnalyzer.isolate_labels_differences(current_content, parent_content)
+    diff[:added_labels] = label_diff[:added].length
+    diff[:removed_labels] = label_diff[:removed].length
+    diff[:changed_labels] = label_diff[:changed].length
+
+    # Calculate description differences
+    description_diff = DescriptionAnalyzer.isolate_descriptions_differences(current_content, parent_content)
+    diff[:added_descriptions] = description_diff[:added].length
+    diff[:removed_descriptions] = description_diff[:removed].length
+    diff[:changed_descriptions] = description_diff[:changed].length
+
+    # Calculate sitelink differences
+    sitelink_diff = SitelinkAnalyzer.isolate_sitelinks_differences(current_content, parent_content)
+    diff[:added_sitelinks] = sitelink_diff[:added].length
+    diff[:removed_sitelinks] = sitelink_diff[:removed].length
+    diff[:changed_sitelinks] = sitelink_diff[:changed].length
+
+
+    phrases = CommentAnalyzer.isolate_comment_differences(comment)
+    diff[:merge_to] = phrases[:merge_to]
+    diff[:merge_from] = phrases[:merge_from]
+    diff[:redirect] = phrases[:redirect]
+    diff[:undo] = phrases[:undo]
+    diff[:restore] = phrases[:restore]
+    diff[:clear_item] = phrases[:clear_item]
+    diff[:create_item] = phrases[:create_item]
+
+
+    diff[:added_lemmas] = 0
+    diff[:removed_lemmas] = 0
+    diff[:changed_lemmas] = 0
+    diff[:added_forms] = 0
+    diff[:removed_forms] = 0
+    diff[:changed_forms] = 0
+    diff[:added_senses] = 0
+    diff[:removed_senses] = 0
+    diff[:changed_senses] = 0
+    diff[:create_property] = 0
+    diff[:create_lexeme] = 0
+
+    diff
+  end
+
+  def self.property(diff, revision_data)
+    current_content = revision_data[:current_content]
+    parent_content = revision_data[:parent_content]
+    comment = revision_data[:comment]
+    # Calculate claim differences includes references and qualifiers
+    claim_diff = ClaimAnalyzer.isolate_claim_differences(current_content, parent_content)
+    diff[:added_claims] = claim_diff[:added_claims].length
+    diff[:removed_claims] = claim_diff[:removed_claims].length
+    diff[:changed_claims] = claim_diff[:changed_claims].length
+    diff[:added_references] = claim_diff[:added_references].length
+    diff[:removed_references] = claim_diff[:removed_references].length
+    diff[:changed_references] = claim_diff[:changed_references].length
+    diff[:added_qualifiers] = claim_diff[:added_qualifiers].length
+    diff[:removed_qualifiers] = claim_diff[:removed_qualifiers].length
+    diff[:changed_qualifiers] = claim_diff[:changed_qualifiers].length
+
+    # Calculate alias differences
+    alias_diff = AliasAnalyzer.isolate_aliases_differences(current_content, parent_content)
+    diff[:added_aliases] = alias_diff[:added].length
+    diff[:removed_aliases] = alias_diff[:removed].length
+    diff[:changed_aliases] = alias_diff[:changed].length
+
+
+    # Calculate label differences
+    label_diff = LabelAnalyzer.isolate_labels_differences(current_content, parent_content)
+    diff[:added_labels] = label_diff[:added].length
+    diff[:removed_labels] = label_diff[:removed].length
+    diff[:changed_labels] = label_diff[:changed].length
+
+    # Calculate description differences
+    description_diff = DescriptionAnalyzer.isolate_descriptions_differences(current_content, parent_content)
+    diff[:added_descriptions] = description_diff[:added].length
+    diff[:removed_descriptions] = description_diff[:removed].length
+    diff[:changed_descriptions] = description_diff[:changed].length
+
+    # not present in properties
+    diff[:added_sitelinks] = 0
+    diff[:removed_sitelinks] = 0
+    diff[:changed_sitelinks] = 0
+
+    phrases = CommentAnalyzer.isolate_comment_differences(comment)
+    diff[:merge_to] = phrases[:merge_to]
+    diff[:merge_from] = phrases[:merge_from]
+    diff[:redirect] = phrases[:redirect]
+    diff[:undo] = phrases[:undo]
+    diff[:restore] = phrases[:restore]
+    diff[:clear_item] = phrases[:clear_item]
+    diff[:create_item] = 0
+    diff[:create_property] = phrases[:create_item]
+    diff[:create_lexeme] = 0
+
+    diff[:added_lemmas] = 0
+    diff[:removed_lemmas] = 0
+    diff[:changed_lemmas] = 0
+    diff[:added_forms] = 0
+    diff[:removed_forms] = 0
+    diff[:changed_forms] = 0
+    diff[:added_senses] = 0
+    diff[:removed_senses] = 0
+    diff[:changed_senses] = 0
+  end
+
+  def self.lexeme(diff, revision_data)
+    current_content = revision_data[:current_content]
+    parent_content = revision_data[:parent_content]
+    comment = revision_data[:comment]
+    # Calculate claim differences includes references and qualifiers
+    claim_diff = ClaimAnalyzer.isolate_claim_differences(current_content, parent_content)
+    diff[:added_claims] = claim_diff[:added_claims].length
+    diff[:removed_claims] = claim_diff[:removed_claims].length
+    diff[:changed_claims] = claim_diff[:changed_claims].length
+    diff[:added_references] = claim_diff[:added_references].length
+    diff[:removed_references] = claim_diff[:removed_references].length
+    diff[:changed_references] = claim_diff[:changed_references].length
+    diff[:added_qualifiers] = claim_diff[:added_qualifiers].length
+    diff[:removed_qualifiers] = claim_diff[:removed_qualifiers].length
+    diff[:changed_qualifiers] = claim_diff[:changed_qualifiers].length
+
+    # not present in lexeme
+    diff[:added_aliases] = 0
+    diff[:removed_aliases] = 0
+    diff[:changed_aliases] = 0
+    diff[:added_labels] = 0
+    diff[:removed_labels] = 0
+    diff[:changed_labels] = 0
+    diff[:added_descriptions] = 0
+    diff[:removed_descriptions] = 0
+    diff[:changed_descriptions] = 0
+    diff[:added_sitelinks] = 0
+    diff[:removed_sitelinks] = 0
+    diff[:changed_sitelinks] = 0
+
+    # Calculate alias differences
+    forms_diff = FormAnalyzer.isolate_forms_differences(current_content, parent_content)
+    diff[:added_forms] = forms_diff[:added].length
+    diff[:removed_forms] = forms_diff[:removed].length
+    diff[:changed_forms] = forms_diff[:changed].length
+
+
+    # Calculate label differences
+    lemmas_diff = LemmaAnalyzer.isolate_lemmas_differences(current_content, parent_content)
+    diff[:added_lemmas] = lemmas_diff[:added].length
+    diff[:removed_lemmas] = lemmas_diff[:removed].length
+    diff[:changed_lemmas] = lemmas_diff[:changed].length
+
+    # Calculate description differences
+    senses_diff = SenseAnalyzer.isolate_senses_differences(current_content, parent_content)
+    diff[:added_senses] = senses_diff[:added].length
+    diff[:removed_senses] = senses_diff[:removed].length
+    diff[:changed_senses] = senses_diff[:changed].length
+
+    phrases = CommentAnalyzer.isolate_comment_differences(comment)
+    diff[:merge_to] = phrases[:merge_to]
+    diff[:merge_from] = phrases[:merge_from]
+    diff[:redirect] = phrases[:redirect]
+    diff[:undo] = phrases[:undo]
+    diff[:restore] = phrases[:restore]
+    diff[:clear_item] = phrases[:clear_item]
+    diff[:create_item] = 0
+    diff[:create_property] = 0
+    diff[:create_lexeme] = phrases[:create_item]
+
   end
 end

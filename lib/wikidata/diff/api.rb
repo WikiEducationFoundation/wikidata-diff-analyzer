@@ -41,11 +41,30 @@ class Api
           
             revisions.each do |revision|
               content_model = revision['slots']['main']['contentmodel']
-              if content_model != 'wikibase-item'
-                puts "Content model is not wikibase-item"
-                puts "Revision ID #{revision['revid']} is a #{content_model}"
-              else
-                wikidata_item(revision, parsed_contents)
+              if content_model == 'wikibase-item' || content_model == 'wikibase-property' || content_model == 'wikibase-lexeme'
+                if revision.key?('texthidden')
+                  puts "Content has been hidden or deleted"
+                  revid = revision['revid']
+                  parentid = revision['parentid']
+                  parsed_contents[revid] = { content: nil, comment: nil, parentid: parentid, model: content_model }
+                # checking if comment has been deleted
+                elsif revision.key?('commenthidden')
+                  puts "Comment has been hidden or deleted"
+                  revid = revision['revid']
+                  content = revision['slots']['main']['*']
+                  parentid = revision['parentid']
+                  parsed_contents[revid] = { content: JSON.parse(content), comment: nil, parentid: parentid, model: content_model }
+                else
+                  content = revision['slots']['main']['*']
+                  revid = revision['revid']
+                  comment = revision['comment']
+                  parentid = revision['parentid']
+                  if revid == 0 || revid.nil?
+                    parsed_contents[revid] = { content: nil, comment: nil, parentid: nil, model: 'wikibase-item' }
+                  else
+                    parsed_contents[revid] = { content: JSON.parse(content), comment: comment, parentid: parentid, model: content_model}
+                  end
+                end
               end
             end
           end
@@ -58,38 +77,4 @@ class Api
         raise e
         end
     end
-
-    def self.wikidata_item(revision, parsed_contents)
-      # checking if content has been deleted
-      puts "wikidata_item"
-      if revision.key?('texthidden')
-        puts "Content has been hidden or deleted"
-        revid = revision['revid']
-        parentid = revision['parentid']
-        parsed_contents[revid] = { content: nil, comment: nil, parentid: parentid }
-      # checking if comment has been deleted
-      elsif revision.key?('commenthidden')
-        puts "Comment has been hidden or deleted"
-        revid = revision['revid']
-        content = revision['slots']['main']['*']
-        parentid = revision['parentid']
-        parsed_contents[revid] = { content: JSON.parse(content), comment: nil, parentid: parentid }
-      else
-        content = revision['slots']['main']['*']
-        revid = revision['revid']
-        comment = revision['comment']
-        parentid = revision['parentid']
-        if revid == 0 || revid.nil?
-          parsed_contents[revid] = { content: nil, comment: nil, parentid: nil }
-        else
-          parsed_contents[revid] = { content: JSON.parse(content), comment: comment, parentid: parentid }
-        end
-      end
-    end
-
-    def self.wikidata_property(revision)
-    end
-
-    def self.wikidata_lexeme(revision)
-    end
-end
+  end

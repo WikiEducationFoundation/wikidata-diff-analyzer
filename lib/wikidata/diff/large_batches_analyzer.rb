@@ -35,14 +35,16 @@ class LargeBatchesAnalyzer
           result[revid] = {
             current_content: data&.fetch(:content, nil),
             parent_content: parent_content&.fetch(:content, nil),
-            comment: data&.fetch(:comment, nil)
+            comment: data&.fetch(:comment, nil),
+            model: data&.fetch(:model, nil)
           }
         end
         first_revisions.each do |revid|
           result[revid] = {
             current_content: revision_contents[revid]&.fetch(:content, nil),
             parent_content: nil,
-            comment: revision_contents[revid]&.fetch(:comment, nil)
+            comment: revision_contents[revid]&.fetch(:comment, nil),
+            model: revision_contents[revid]&.fetch(:model, nil)
           }
         end
         result

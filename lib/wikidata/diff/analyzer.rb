@@ -35,13 +35,24 @@ module WikidataDiffAnalyzer
       sitelinks_added: 0,
       sitelinks_removed: 0,
       sitelinks_changed: 0,
+      lemmas_added: 0,
+      lemmas_removed: 0,
+      lemmas_changed: 0,
+      forms_added: 0,
+      forms_removed: 0,
+      forms_changed: 0,
+      senses_added: 0,
+      senses_removed: 0,
+      senses_changed: 0,
       merge_to: 0,
       merge_from: 0,
       redirect: 0,
       undo: 0,
       restore: 0,
       clear_item: 0,
-      create_item: 0
+      create_item: 0,
+      create_property: 0,
+      create_lexeme: 0
     }
 
     # if revision_ids has 0, then 0 can never be analyzed, so remove it and add in not analyzed
@@ -64,12 +75,12 @@ module WikidataDiffAnalyzer
 
     result.each do |revision_id, revision_data|
       current_content = revision_data[:current_content]
-      parent_content = revision_data[:parent_content]
-      comment = revision_data[:comment]
+      # parent_content = revision_data[:parent_content]
+      # comment = revision_data[:comment]
       
     
       if current_content
-        diff = RevisionAnalyzer.analyze_diff(current_content, parent_content, comment)
+        diff = RevisionAnalyzer.analyze_diff(revision_data)
         diffs[revision_id] = diff
         Total.accumulate_totals(diff, total)
         diffs_analyzed << revision_id
@@ -89,5 +100,7 @@ module WikidataDiffAnalyzer
   end
 end
 
-rev = WikidataDiffAnalyzer.analyze([123])
+#rev = WikidataDiffAnalyzer.analyze([1820719680]) # added a claim for lexeme
+#rev = WikidataDiffAnalyzer.analyze([1755043617]) # added a form for lexeme
+rev = WikidataDiffAnalyzer.analyze([1138771589]) # created a lexeme
 puts rev
