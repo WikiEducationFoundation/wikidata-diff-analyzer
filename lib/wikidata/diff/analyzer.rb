@@ -88,3 +88,6 @@ module WikidataDiffAnalyzer
     }
   end
 end
+
+rev = WikidataDiffAnalyzer.analyze([123])
+puts rev

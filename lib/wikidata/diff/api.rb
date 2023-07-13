@@ -10,6 +10,7 @@ class Api
         # check if duplicate revision_ids exist and print if exists
 
         revision_ids = revision_ids.uniq if revision_ids
+        puts revision_ids
 
         begin
         response = client.action(
@@ -44,34 +45,10 @@ class Api
                 puts "Content model is not wikibase-item"
                 puts "Revision ID #{revision['revid']} is a #{content_model}"
               else
-                # checking if content has been deleted
-                if revision.key?('texthidden')
-                  puts "Content has been hidden or deleted"
-                  revid = revision['revid']
-                  parentid = revision['parentid']
-                  parsed_contents[revid] = { content: nil, comment: nil, parentid: parentid }
-                # checking if comment has been deleted
-                elsif revision.key?('commenthidden')
-                  puts "Comment has been hidden or deleted"
-                  revid = revision['revid']
-                  content = revision['slots']['main']['*']
-                  parentid = revision['parentid']
-                  parsed_contents[revid] = { content: JSON.parse(content), comment: nil, parentid: parentid }
-                else
-                  content = revision['slots']['main']['*']
-                  revid = revision['revid']
-                  comment = revision['comment']
-                  parentid = revision['parentid']
-                  if revid == 0 || revid.nil?
-                    parsed_contents[revid] = { content: nil, comment: nil, parentid: nil }
-                  else
-                    parsed_contents[revid] = { content: JSON.parse(content), comment: comment, parentid: parentid }
-                  end
-                end
+                wikidata_item(revision, parsed_contents)
               end
             end
           end
-          
         return parsed_contents
         rescue MediawikiApi::ApiError => e
         puts "Error retrieving revision content: #{e.message}"
@@ -80,5 +57,39 @@ class Api
         puts "Error parsing JSON content: #{e.message}"
         raise e
         end
+    end
+
+    def self.wikidata_item(revision, parsed_contents)
+      # checking if content has been deleted
+      puts "wikidata_item"
+      if revision.key?('texthidden')
+        puts "Content has been hidden or deleted"
+        revid = revision['revid']
+        parentid = revision['parentid']
+        parsed_contents[revid] = { content: nil, comment: nil, parentid: parentid }
+      # checking if comment has been deleted
+      elsif revision.key?('commenthidden')
+        puts "Comment has been hidden or deleted"
+        revid = revision['revid']
+        content = revision['slots']['main']['*']
+        parentid = revision['parentid']
+        parsed_contents[revid] = { content: JSON.parse(content), comment: nil, parentid: parentid }
+      else
+        content = revision['slots']['main']['*']
+        revid = revision['revid']
+        comment = revision['comment']
+        parentid = revision['parentid']
+        if revid == 0 || revid.nil?
+          parsed_contents[revid] = { content: nil, comment: nil, parentid: nil }
+        else
+          parsed_contents[revid] = { content: JSON.parse(content), comment: comment, parentid: parentid }
+        end
+      end
+    end
+
+    def self.wikidata_property(revision)
+    end
+
+    def self.wikidata_lexeme(revision)
     end
 end
