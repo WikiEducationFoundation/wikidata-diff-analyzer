@@ -100,7 +100,12 @@ module WikidataDiffAnalyzer
   end
 end
 
+random_revids = Array.new(500) { rand(1_000_000_000..2_000_000_000) }
+
 #rev = WikidataDiffAnalyzer.analyze([1820719680]) # added a claim for lexeme
 #rev = WikidataDiffAnalyzer.analyze([1755043617]) # added a form for lexeme
 rev = WikidataDiffAnalyzer.analyze([1138771589]) # created a lexeme
-puts rev
+rev = WikidataDiffAnalyzer.analyze(random_revids) # added a claim for lexeme
+
+puts rev[:total]
+puts rev[:diffs_analyzed_count]

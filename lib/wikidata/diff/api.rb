@@ -10,7 +10,6 @@ class Api
         # check if duplicate revision_ids exist and print if exists
 
         revision_ids = revision_ids.uniq if revision_ids
-        puts revision_ids
 
         begin
         response = client.action(
@@ -23,7 +22,6 @@ class Api
         )
 
         if response.nil?
-            puts "No response received for revision IDs: #{revision_ids.join(', ')}"
             return {}
         end
 
@@ -31,7 +29,6 @@ class Api
 
         # checks if it has pages
         if response.data['pages'].nil?
-            puts "No pages found in the response for revision IDs: #{revision_ids.join(', ')}"
             return nil
         end
 
@@ -65,6 +62,9 @@ class Api
                     parsed_contents[revid] = { content: JSON.parse(content), comment: comment, parentid: parentid, model: content_model}
                   end
                 end
+              else
+                puts "Content model is not wikibase-item, wikibase-property or wikibase-lexeme"
+                puts "Content model is #{content_model}"
               end
             end
           end
