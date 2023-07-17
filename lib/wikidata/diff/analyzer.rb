@@ -41,9 +41,15 @@ module WikidataDiffAnalyzer
       forms_added: 0,
       forms_removed: 0,
       forms_changed: 0,
+      representations_added: 0,
+      representations_removed: 0,
+      representations_changed: 0,
       senses_added: 0,
       senses_removed: 0,
       senses_changed: 0,
+      glosses_added: 0,
+      glosses_removed: 0,
+      glosses_changed: 0,
       merge_to: 0,
       merge_from: 0,
       redirect: 0,
@@ -102,10 +108,10 @@ end
 
 random_revids = Array.new(500) { rand(1_000_000_000..2_000_000_000) }
 
-#rev = WikidataDiffAnalyzer.analyze([1820719680]) # added a claim for lexeme
+# rev = WikidataDiffAnalyzer.analyze([1820719680]) # added a claim for lexeme
 #rev = WikidataDiffAnalyzer.analyze([1755043617]) # added a form for lexeme
 rev = WikidataDiffAnalyzer.analyze([1138771589]) # created a lexeme
-rev = WikidataDiffAnalyzer.analyze(random_revids) # added a claim for lexeme
+#rev = WikidataDiffAnalyzer.analyze(random_revids) # added a claim for lexeme
 
 puts rev[:total]
 puts rev[:diffs_analyzed_count]

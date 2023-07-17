@@ -27,9 +27,15 @@ class Total
         total[:forms_added] += diff_data[:added_forms]
         total[:forms_removed] += diff_data[:removed_forms]
         total[:forms_changed] += diff_data[:changed_forms]
+        total[:representations_added] += diff_data[:added_representations]
+        total[:representations_removed] += diff_data[:removed_representations]
+        total[:representations_changed] += diff_data[:changed_representations]
         total[:senses_added] += diff_data[:added_senses]
         total[:senses_removed] += diff_data[:removed_senses]
         total[:senses_changed] += diff_data[:changed_senses]
+        total[:glosses_added] += diff_data[:added_glosses]
+        total[:glosses_removed] += diff_data[:removed_glosses]
+        total[:glosses_changed] += diff_data[:changed_glosses]
         total[:merge_from] += diff_data[:merge_from]
         total[:merge_to] += diff_data[:merge_to]
         total[:undo] += diff_data[:undo]
@@ -39,5 +45,6 @@ class Total
         total[:create_property] += diff_data[:create_property]
         total[:create_lexeme] += diff_data[:create_lexeme]
         total[:redirect] += diff_data[:redirect]
+
     end
 end
