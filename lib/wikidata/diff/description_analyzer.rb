@@ -18,7 +18,7 @@ class DescriptionAnalyzer
         removed_descriptions = []    # Initialize as an array
         added_descriptions = []      # Initialize as an array
     
-        if !current_descriptions.is_a?(Hash)
+        if !current_descriptions.is_a?(Hash) || !parent_descriptions.is_a?(Hash)
         return{
             changed: changed_descriptions,
             removed: removed_descriptions,

@@ -1,5 +1,5 @@
 class GlossAnalyzer
-    def self.isolate_glosses_differences(current_content, parent_content)
+    def self.isolate_gloss_differences(current_content, parent_content)
         return {
         changed: [],
         removed: [],
