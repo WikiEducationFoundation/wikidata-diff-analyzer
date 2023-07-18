@@ -22,7 +22,6 @@ class Api
         )
 
         if response.nil?
-            puts "No response received for revision IDs: #{revision_ids.join(', ')}"
             return {}
         end
 
@@ -30,7 +29,6 @@ class Api
 
         # checks if it has pages
         if response.data['pages'].nil?
-            puts "No pages found in the response for revision IDs: #{revision_ids.join(', ')}"
             return nil
         end
 
@@ -40,38 +38,36 @@ class Api
           
             revisions.each do |revision|
               content_model = revision['slots']['main']['contentmodel']
-              if content_model != 'wikibase-item'
-                puts "Content model is not wikibase-item"
-                puts "Revision ID #{revision['revid']} is a #{content_model}"
-              else
-                # checking if content has been deleted
+              if content_model == 'wikibase-item' || content_model == 'wikibase-property' || content_model == 'wikibase-lexeme'
                 if revision.key?('texthidden')
                   puts "Content has been hidden or deleted"
                   revid = revision['revid']
                   parentid = revision['parentid']
-                  parsed_contents[revid] = { content: nil, comment: nil, parentid: parentid }
+                  parsed_contents[revid] = { content: nil, comment: nil, parentid: parentid, model: content_model }
                 # checking if comment has been deleted
                 elsif revision.key?('commenthidden')
                   puts "Comment has been hidden or deleted"
                   revid = revision['revid']
                   content = revision['slots']['main']['*']
                   parentid = revision['parentid']
-                  parsed_contents[revid] = { content: JSON.parse(content), comment: nil, parentid: parentid }
+                  parsed_contents[revid] = { content: JSON.parse(content), comment: nil, parentid: parentid, model: content_model }
                 else
                   content = revision['slots']['main']['*']
                   revid = revision['revid']
                   comment = revision['comment']
                   parentid = revision['parentid']
                   if revid == 0 || revid.nil?
-                    parsed_contents[revid] = { content: nil, comment: nil, parentid: nil }
+                    parsed_contents[revid] = { content: nil, comment: nil, parentid: nil, model: 'wikibase-item' }
                   else
-                    parsed_contents[revid] = { content: JSON.parse(content), comment: comment, parentid: parentid }
+                    parsed_contents[revid] = { content: JSON.parse(content), comment: comment, parentid: parentid, model: content_model}
                   end
                 end
+              else
+                puts "Content model is not wikibase-item, wikibase-property or wikibase-lexeme"
+                puts "Content model is #{content_model}"
               end
             end
           end
-          
         return parsed_contents
         rescue MediawikiApi::ApiError => e
         puts "Error retrieving revision content: #{e.message}"
@@ -81,4 +77,4 @@ class Api
         raise e
         end
     end
-end
+  end

@@ -6,8 +6,12 @@ class DescriptionAnalyzer
         added: []
         } if current_content.nil? && parent_content.nil?
     
-        current_descriptions = (current_content['descriptions'] || {}) if current_content
-        parent_descriptions = (parent_content['descriptions'] || {}) if parent_content
+        current_descriptions = (current_content['descriptions']) if current_content
+        if parent_content
+            parent_descriptions = parent_content['descriptions'] 
+        else
+            parent_descriptions = {}
+        end
 
     
         changed_descriptions = []    # Initialize as an array

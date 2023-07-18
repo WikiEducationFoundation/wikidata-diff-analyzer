@@ -1,14 +1,14 @@
-class LabelAnalyzer
-    def self.isolate_labels_differences(current_content, parent_content)
+class LemmaAnalyzer
+    def self.isolate_lemmas_differences(current_content, parent_content)
         return {
         changed: [],
         removed: [],
         added: []
         } if current_content.nil? && parent_content.nil?
     
-        current_labels = (current_content['labels'] || {}) if current_content
+        current_labels = (current_content['lemmas'] || {}) if current_content
         if parent_content
-            parent_labels = parent_content['labels'] 
+            parent_labels = parent_content['lemmas'] 
         else
             parent_labels = {}
         end
