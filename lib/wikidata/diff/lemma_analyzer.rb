@@ -7,13 +7,17 @@ class LemmaAnalyzer
         } if current_content.nil? && parent_content.nil?
     
         current_labels = (current_content['lemmas'] || {}) if current_content
-        parent_labels = (parent_content['lemmas'] || {}) if parent_content
+        if parent_content
+            parent_labels = parent_content['lemmas'] 
+        else
+            parent_labels = {}
+        end
 
         changed_labels = []
         removed_labels = []
         added_labels = []
 
-        if current_labels.is_a?(Array) || parent_labels.is_a?(Array)
+        if current_labels.is_a?(Array)
         return {
         changed: changed_labels,
         removed: removed_labels,

@@ -93,6 +93,12 @@ class RevisionAnalyzer
     diff[:added_glosses] = 0
     diff[:removed_glosses] = 0
     diff[:changed_glosses] = 0
+    diff[:added_formclaims] = 0
+    diff[:removed_formclaims] = 0
+    diff[:changed_formclaims] = 0
+    diff[:added_senseclaims] = 0
+    diff[:removed_senseclaims] = 0
+    diff[:changed_senseclaims] = 0
 
     diff
   end
@@ -163,6 +169,12 @@ class RevisionAnalyzer
     diff[:added_glosses] = 0
     diff[:removed_glosses] = 0
     diff[:changed_glosses] = 0
+    diff[:added_formclaims] = 0
+    diff[:removed_formclaims] = 0
+    diff[:changed_formclaims] = 0
+    diff[:added_senseclaims] = 0
+    diff[:removed_senseclaims] = 0
+    diff[:changed_senseclaims] = 0
   end
 
   def self.lexeme(diff, revision_data)
@@ -203,6 +215,10 @@ class RevisionAnalyzer
     diff[:added_representations] = forms_diff[:added_representations].length
     diff[:removed_representations] = forms_diff[:removed_representations].length
     diff[:changed_representations] = forms_diff[:changed_representations].length
+    diff[:added_formclaims] = forms_diff[:added_formclaims].length
+    diff[:removed_formclaims] = forms_diff[:removed_formclaims].length
+    diff[:changed_formclaims] = forms_diff[:changed_formclaims].length
+
 
 
     # Calculate label differences
@@ -219,6 +235,10 @@ class RevisionAnalyzer
     diff[:added_glosses] = senses_diff[:added_glosses].length
     diff[:removed_glosses] = senses_diff[:removed_glosses].length
     diff[:changed_glosses] = senses_diff[:changed_glosses].length
+    diff[:added_senseclaims] = senses_diff[:added_senseclaims].length
+    diff[:removed_senseclaims] = senses_diff[:removed_senseclaims].length
+    diff[:changed_senseclaims] = senses_diff[:changed_senseclaims].length
+
 
     phrases = CommentAnalyzer.isolate_comment_differences(comment)
     diff[:merge_to] = phrases[:merge_to]

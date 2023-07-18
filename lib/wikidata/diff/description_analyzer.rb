@@ -6,15 +6,19 @@ class DescriptionAnalyzer
         added: []
         } if current_content.nil? && parent_content.nil?
     
-        current_descriptions = (current_content['descriptions'] || {}) if current_content
-        parent_descriptions = (parent_content['descriptions'] || {}) if parent_content
+        current_descriptions = (current_content['descriptions']) if current_content
+        if parent_content
+            parent_descriptions = parent_content['descriptions'] 
+        else
+            parent_descriptions = {}
+        end
 
     
         changed_descriptions = []    # Initialize as an array
         removed_descriptions = []    # Initialize as an array
         added_descriptions = []      # Initialize as an array
     
-        if !current_descriptions.is_a?(Hash) || !parent_descriptions.is_a?(Hash)
+        if !current_descriptions.is_a?(Hash)
         return{
             changed: changed_descriptions,
             removed: removed_descriptions,

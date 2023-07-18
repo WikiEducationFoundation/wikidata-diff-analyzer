@@ -17,7 +17,7 @@ class GlossAnalyzer
         removed = []
         added = []
 
-        if current_glosses.is_a?(Array) || parent_glosses.is_a?(Array)
+        if current_glosses.is_a?(Array)
         return {
         changed: changed,
         removed: removed,
