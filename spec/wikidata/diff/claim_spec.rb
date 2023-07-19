@@ -24,7 +24,7 @@ RSpec.describe '.isolate_claim_differences' do
         changed_qualifiers: []
       }
   
-      result = ClaimAnalyzer.isolate_claim_differences(current_content, parent_content)
+      result = ClaimAnalyzer.isolate_claims_differences(current_content, parent_content)
   
       expect(result).to eq(expected_result)
     end
@@ -49,7 +49,7 @@ RSpec.describe '.isolate_claim_differences' do
         changed_qualifiers: []
       }
   
-      result = ClaimAnalyzer.isolate_claim_differences(current_content, parent_content)
+      result = ClaimAnalyzer.isolate_claims_differences(current_content, parent_content)
   
       expect(result).to eq(expected_result)
     end
@@ -74,7 +74,7 @@ RSpec.describe '.isolate_claim_differences' do
         changed_qualifiers: []
       }
   
-      result = ClaimAnalyzer.isolate_claim_differences(current_content, parent_content)
+      result = ClaimAnalyzer.isolate_claims_differences(current_content, parent_content)
   
       expect(result).to eq(expected_result)
     end

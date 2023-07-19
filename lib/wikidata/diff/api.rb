@@ -63,8 +63,8 @@ class Api
                   end
                 end
               else
-                puts "Content model is not wikibase-item, wikibase-property or wikibase-lexeme"
                 puts "Content model is #{content_model}"
+                puts "Revision id is #{revision['revid']}"
               end
             end
           end

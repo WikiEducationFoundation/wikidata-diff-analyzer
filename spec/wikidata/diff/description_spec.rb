@@ -12,9 +12,9 @@ RSpec.describe '.isolate_descriptions_differences' do
     parent_content = result[1670943384][:parent_content]
 
     expected_result = {
-        added: [],
-        removed: [],
-        changed: [{:lang=>"en"}]
+        added_descriptions: [],
+        removed_descriptions: [],
+        changed_descriptions: [{:lang=>"en"}]
         }
     result = DescriptionAnalyzer.isolate_descriptions_differences(current_content, parent_content)
 

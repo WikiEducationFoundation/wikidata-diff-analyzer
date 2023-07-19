@@ -6,24 +6,29 @@ class RepresentationAnalyzer
         added: []
         } if current_content.nil? && parent_content.nil?
     
-        current_representations = (current_content['representations'] || {}) if current_content
+        if current_content
+            current_representations = current_content['representations']
+            if current_representations.nil? || current_representations.is_a?(Array)
+                current_representations = {}
+            end
+        else
+            current_representations = {}
+        end
+        
         if parent_content
             parent_representations = parent_content['representations'] 
+            if parent_representations.nil? || parent_representations.is_a?(Array)
+                parent_representations = {}
+            end
         else
             parent_representations = {}
         end
+
 
         changed = []
         removed = []
         added = []
 
-        if current_representations.is_a?(Array) ||  parent_representations.is_a?(Array)
-        return {
-        changed: changed,
-        removed: removed,
-        added: added
-        }
-        end
 
         # if parentid is 0, then add all labels as added and return it
         if parent_content.nil?

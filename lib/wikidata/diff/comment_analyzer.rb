@@ -38,6 +38,8 @@ class CommentAnalyzer
         phrases[:clear_item] = 1
     end
 
+    # create-property, create-item, create-lexeme all includes this phrase
+    # so based on content model in revision analyzer, it is decided which one it is
     if comment.include?('wbeditentity-create')
         phrases[:create_item] = 1
     end

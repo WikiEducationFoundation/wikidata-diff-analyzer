@@ -82,15 +82,9 @@ module WikidataDiffAnalyzer
     # end
 
     result = LargeBatchesAnalyzer.handle_large_batches(revision_ids, 50)
-    # result is a hash which has contents like this:
-    # result[revid] = { current_content: data[:content], parent_content: parent_content }
 
     result.each do |revision_id, revision_data|
       current_content = revision_data[:current_content]
-      # parent_content = revision_data[:parent_content]
-      # comment = revision_data[:comment]
-      
-    
       if current_content
         diff = RevisionAnalyzer.analyze_diff(revision_data)
         diffs[revision_id] = diff
@@ -112,12 +106,4 @@ module WikidataDiffAnalyzer
   end
 end
 
-random_revids = Array.new(500) { rand(1_700_000_000..1_800_000_000) }
-
-# rev = WikidataDiffAnalyzer.analyze([1820719680]) # added a claim for lexeme
-#rev = WikidataDiffAnalyzer.analyze([1755043617]) # added a form for lexeme
-# rev = WikidataDiffAnalyzer.analyze([1138771589]) # created a lexeme
-rev = WikidataDiffAnalyzer.analyze(random_revids) # added a claim for lexeme
-# rev = WikidataDiffAnalyzer.analyze( [78107026, 1685180442, 1685180442, 1685199319, 1685199324, 1685530131, 1712237413, 1721675477]) # added a claim for lexeme
-
-puts rev
+puts WikidataDiffAnalyzer.analyze([1007241555, 1007241817, 1007242285, 1007242344, 1007242344, 1007242377, 1007242410, 1007242454, 1007242480, 1007242733])

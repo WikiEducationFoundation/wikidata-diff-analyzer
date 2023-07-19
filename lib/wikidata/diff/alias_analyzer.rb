@@ -1,26 +1,33 @@
 class AliasAnalyzer
     def self.isolate_aliases_differences(current_content, parent_content)
         return {
-        changed: [],
-        removed: [],
-        added: []
+        changed_aliases: [],
+        removed_aliases: [],
+        added_aliases: []
         } if current_content.nil? && parent_content.nil?
 
         changed_aliases = []
         removed_aliases = []
         added_aliases = []
 
-        current_aliases = (current_content['aliases'] || {}) if current_content
-        parent_aliases = (parent_content['aliases'] || {}) if parent_content 
-
-    
-        if current_aliases.is_a?(Array) || parent_aliases.is_a?(Array)
-            return {
-            changed: changed_aliases,
-            removed: removed_aliases,
-            added: added_aliases
-            }
+        if current_content
+            current_aliases = current_content['aliases']
+            if current_aliases.nil? || current_aliases.is_a?(Array)
+                current_aliases = {}
+            end
+        else
+            current_aliases = {}
         end
+
+        if parent_content
+            parent_aliases = parent_content['aliases']
+            if parent_aliases.nil? || parent_aliases.is_a?(Array)
+                parent_aliases = {}
+            end
+        else
+            parent_aliases = {}
+        end
+
 
         if parent_content.nil?
             (current_aliases || {}).each do |lang, current_aliases_arr|
@@ -73,9 +80,9 @@ class AliasAnalyzer
             end
         end
         {
-            changed: changed_aliases,
-            removed: removed_aliases,
-            added: added_aliases    
+            changed_aliases: changed_aliases,
+            removed_aliases: removed_aliases,
+            added_aliases: added_aliases    
         }
     end
 end

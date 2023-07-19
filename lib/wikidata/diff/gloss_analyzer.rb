@@ -6,24 +6,29 @@ class GlossAnalyzer
         added: []
         } if current_content.nil? && parent_content.nil?
     
-        current_glosses = (current_content['glosses'] || {}) if current_content
+        if current_content
+            current_glosses = current_content['glosses']
+            if current_glosses.nil? || current_glosses.is_a?(Array)
+                current_glosses = {}
+            end
+        else
+            current_glosses = {}
+        end
+
         if parent_content
             parent_glosses = parent_content['glosses'] 
+            if parent_glosses.nil? || parent_glosses.is_a?(Array)
+                parent_glosses = {}
+            end
         else
             parent_glosses = {}
         end
 
+
+
         changed = []
         removed = []
         added = []
-
-        if current_glosses.is_a?(Array)
-        return {
-        changed: changed,
-        removed: removed,
-        added: added
-        }
-        end
 
         # if parentid is 0, then add all labels as added and return it
         if parent_content.nil?

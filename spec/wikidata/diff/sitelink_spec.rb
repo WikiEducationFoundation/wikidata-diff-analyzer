@@ -11,9 +11,9 @@ RSpec.describe '.isolate_sitelinks_differences' do
       parent_content = result[1633844937][:parent_content]
   
       expected_result = {
-        added: {"arzwiki"=>{"site"=>"arzwiki", "title"=>"جامعة ولاية واشينطون", "badges"=>[]}},
-        removed: {},
-        changed: {}
+        added_sitelinks: {"arzwiki"=>{"site"=>"arzwiki", "title"=>"جامعة ولاية واشينطون", "badges"=>[]}},
+        removed_sitelinks: {},
+        changed_sitelinks: {}
         }
       result = SitelinkAnalyzer.isolate_sitelinks_differences(current_content, parent_content)
   
@@ -29,9 +29,9 @@ RSpec.describe '.isolate_sitelinks_differences' do
       parent_content = result[1889506559][:parent_content]
   
       expected_result = {
-        added: {},
-        removed: {"nahwiki"=>{"site"=>"nahwiki", "title"=>"San Francisco, California", "badges"=>[]}},
-        changed: {}
+        added_sitelinks: {},
+        removed_sitelinks: {"nahwiki"=>{"site"=>"nahwiki", "title"=>"San Francisco, California", "badges"=>[]}},
+        changed_sitelinks: {}
         }
       result = SitelinkAnalyzer.isolate_sitelinks_differences(current_content, parent_content)
   
@@ -48,9 +48,9 @@ RSpec.describe '.isolate_sitelinks_differences' do
   
   
       expected_result = {
-        added: {},
-        removed: {},
-        changed: {"itwiki"=>{:current=>{"site"=>"itwiki", "title"=>"Università statale del Washington", "badges"=>[]}, :parent=>{"site"=>"itwiki", "title"=>"Washington State University", "badges"=>[]}}}
+        added_sitelinks: {},
+        removed_sitelinks: {},
+        changed_sitelinks: {"itwiki"=>{:current=>{"site"=>"itwiki", "title"=>"Università statale del Washington", "badges"=>[]}, :parent=>{"site"=>"itwiki", "title"=>"Washington State University", "badges"=>[]}}}
         }
       result = SitelinkAnalyzer.isolate_sitelinks_differences(current_content, parent_content)
   

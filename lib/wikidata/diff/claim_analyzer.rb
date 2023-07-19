@@ -2,7 +2,7 @@ require_relative 'reference_analyzer'
 require_relative 'qualifier_analyzer'
 
 class ClaimAnalyzer
-    def self.isolate_claim_differences(current_content, parent_content)
+    def self.isolate_claims_differences(current_content, parent_content)
         # Initialize empty arrays to store the added, removed, and changed claims
         added_claims = []
         removed_claims = []
@@ -14,7 +14,16 @@ class ClaimAnalyzer
         removed_qualifiers = []
         changed_qualifiers = []
 
-        current_content_claims = current_content["claims"] if current_content
+        if current_content.nil?
+            current_content_claims = {}
+        else
+            current_content_claims = current_content["claims"]
+            if !current_content_claims.is_a?(Hash)
+                current_content_claims = {}
+            end
+        end
+        
+
         if parent_content.nil?
             parent_content_claims = {}
         else
@@ -23,22 +32,6 @@ class ClaimAnalyzer
                 parent_content_claims = {}
             end
         end
-
-        if !current_content_claims.is_a?(Hash)
-        return {
-            added_claims: added_claims,
-            removed_claims: removed_claims,
-            changed_claims: changed_claims,
-            added_references: added_references,
-            removed_references: removed_references,
-            changed_references: changed_references,
-            added_qualifiers: added_qualifiers,
-            removed_qualifiers: removed_qualifiers,
-            changed_qualifiers: changed_qualifiers
-        }
-        end
-
-        current_content_claims = current_content["claims"] || {}
         
         # if parentid is 0, add all current claims as added claims and return it
         if parent_content.nil?

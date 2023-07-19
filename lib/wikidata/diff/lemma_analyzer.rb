@@ -1,14 +1,25 @@
 class LemmaAnalyzer
     def self.isolate_lemmas_differences(current_content, parent_content)
         return {
-        changed: [],
-        removed: [],
-        added: []
+        changed_lemmas: [],
+        removed_lemmas: [],
+        added_lemmas: []
         } if current_content.nil? && parent_content.nil?
     
-        current_labels = (current_content['lemmas'] || {}) if current_content
+        
+        if current_content
+            current_labels = current_content['lemmas']
+            if current_labels.nil? || current_labels.is_a?(Array)
+                current_labels = {}
+            end
+        else
+            current_labels = {}
+        end
         if parent_content
             parent_labels = parent_content['lemmas'] 
+            if parent_labels.nil? || parent_labels.is_a?(Array)
+                parent_labels = {}
+            end
         else
             parent_labels = {}
         end
@@ -17,13 +28,6 @@ class LemmaAnalyzer
         removed_labels = []
         added_labels = []
 
-        if current_labels.is_a?(Array)
-        return {
-        changed: changed_labels,
-        removed: removed_labels,
-        added: added_labels
-        }
-        end
 
         # if parentid is 0, then add all labels as added and return it
         if parent_content.nil?
@@ -31,9 +35,9 @@ class LemmaAnalyzer
                 added_labels << { lang: lang }
             end
             return {
-                changed: changed_labels,
-                removed: removed_labels,
-                added: added_labels
+                changed_lemmas: changed_labels,
+                removed_lemmas: removed_labels,
+                added_lemmas: added_labels
             }
         else
 
@@ -58,9 +62,9 @@ class LemmaAnalyzer
         end
     
         {
-        changed: changed_labels,
-        removed: removed_labels,
-        added: added_labels
+        changed_lemmas: changed_labels,
+        removed_lemmas: removed_labels,
+        added_lemmas: added_labels
         }
     end
 end

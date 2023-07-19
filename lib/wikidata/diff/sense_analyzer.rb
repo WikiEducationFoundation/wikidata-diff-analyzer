@@ -18,9 +18,9 @@ class SenseAnalyzer
  
          if !current_content_senses.is_a?(Array) || !parent_content_senses.is_a?(Array)
          return {
-            added: added_senses,
-            removed: removed_senses,
-            changed: changed_senses,
+            added_senses: added_senses,
+            removed_senses: removed_senses,
+            changed_senses: changed_senses,
             added_glosses: added_glosses,
             removed_glosses: removed_glosses,
             changed_glosses: changed_glosses,
@@ -92,9 +92,9 @@ class SenseAnalyzer
              end
          end
          {
-            added: added_senses,
-            removed: removed_senses,
-            changed: changed_senses,
+            added_senses: added_senses,
+            removed_senses: removed_senses,
+            changed_senses: changed_senses,
             added_glosses: added_glosses,
             removed_glosses: removed_glosses,
             changed_glosses: changed_glosses,
