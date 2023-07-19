@@ -49,9 +49,9 @@ class SitelinkAnalyzer
         end
     
         {
-          added: added_sitelinks,
-          removed: removed_sitelinks,
-          changed: changed_sitelinks
+          added_sitelinks: added_sitelinks,
+          removed_sitelinks: removed_sitelinks,
+          changed_sitelinks: changed_sitelinks
         }
     end
 end 

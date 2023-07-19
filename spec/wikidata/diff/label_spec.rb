@@ -12,9 +12,9 @@ RSpec.describe '.isolate_labels_differences' do
         parent_content = result[670856707][:parent_content]
     
         expected_result = {
-          added: [{:lang=>"he"}],
-          removed: [],
-          changed: []
+          added_labels: [{:lang=>"he"}],
+          removed_labels: [],
+          changed_labels: []
           }
         result = LabelAnalyzer.isolate_labels_differences(current_content, parent_content)
     

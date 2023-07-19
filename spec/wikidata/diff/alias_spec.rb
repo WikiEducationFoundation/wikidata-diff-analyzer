@@ -13,9 +13,9 @@ RSpec.describe '.isolate_aliases_differences' do
       parent_content = result[1900774614][:parent_content]
   
       expected_result = {
-        added: [{:lang=>"en", :index=>4}],
-        removed: [],
-        changed: []
+        added_aliases: [{:lang=>"en", :index=>4}],
+        removed_aliases: [],
+        changed_aliases: []
         }
       result = AliasAnalyzer.isolate_aliases_differences(current_content, parent_content)
   
