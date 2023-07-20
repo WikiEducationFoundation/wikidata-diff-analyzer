@@ -7,6 +7,14 @@ RSpec.describe do
 
     # HTML: https://www.wikidata.org/w/index.php?diff=[REVISION_ID]
     # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=[REVISION_ID]&rvslots=main&rvprop=content|ids|comment&format=json
+    # [78107026] (create-property 1, labels and descriptions added 1)
+    # [1685180442] (labels changed 1)
+    # [1685199319] (descriptions changed 1)
+    # [1685199324] (aliases added 1)
+    # [1685530131] (labels changed 1)
+    # [1712237413] (descriptions changed 1)
+    # [1721675477] (claims changed 1, qualifiers changed 1)
+    
     it 'returns the property edits' do
       revision_ids = [78107026, 1685180442, 1685180442, 1685199319, 1685199324, 1685530131, 1712237413, 1721675477]
       analyzed_revisions = WikidataDiffAnalyzer.analyze(revision_ids)

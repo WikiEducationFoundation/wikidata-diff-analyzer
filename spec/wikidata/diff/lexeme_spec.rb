@@ -7,6 +7,17 @@ RSpec.describe do
 
     # HTML: https://www.wikidata.org/w/index.php?diff=[REVISION_ID]
     # JSON: https://www.wikidata.org/w/api.php?action=query&prop=revisions&revids=[REVISION_ID]&rvslots=main&rvprop=content|ids|comment&format=json
+    # 1007241555 [create-lexeme, lemma added 1]
+    # 1007241817 [form added 1, representation added 1]
+    # 1007242285 [claim added 1]
+    # 1007242344 [claim added 1, qualifier added 1]
+    # 1007242377 [claim added 1, qualifier added 1]
+    # 1007242410 [claim added 1, qualifier added 1]
+    # 1007242454 [form claim added 1]
+    # 1007242480 [form claim changed 1]
+    # 1007242733 [claim added 1]
+    
+
     it 'returns the lexeme edits' do
       revision_ids = [1007241555, 1007241817, 1007242285, 1007242344, 1007242344, 1007242377, 1007242410, 1007242454, 1007242480, 1007242733]
      
