@@ -96,7 +96,3 @@ module WikidataDiffAnalyzer
     }
   end
 end
-
-random_revids = Array.new(500) { rand(1_000_000_000..2_000_000_000) }
-puts WikidataDiffAnalyzer.analyze(random_revids)[:total]
-
