@@ -15,5 +15,3 @@ gem 'mediawiki_api'
 
 gem 'json'
 
-gem 'dotenv'
-

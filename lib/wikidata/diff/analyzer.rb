@@ -2,7 +2,6 @@
 require_relative 'large_batches_analyzer'
 require_relative 'revision_analyzer'
 require_relative 'total'
-require_relative 'mediawiki_login'
 
 module WikidataDiffAnalyzer
   class Error < StandardError; end
@@ -72,14 +71,6 @@ module WikidataDiffAnalyzer
       revision_ids.delete(0)
       diffs_not_analyzed << 0
     end
-    # # if mediawiki can be logged in call for 500, otherwise call for 50
-    # if MediawikiLogin.mediawiki_login
-    #   puts 'Logged in to mediawiki'
-    #   result = LargeBatchesAnalyzer.handle_large_batches(revision_ids, 500)
-    # else
-    #   puts 'Not logged in to mediawiki'
-    #   result = LargeBatchesAnalyzer.handle_large_batches(revision_ids, 50)
-    # end
 
     result = LargeBatchesAnalyzer.handle_large_batches(revision_ids, 50)
 
@@ -105,4 +96,7 @@ module WikidataDiffAnalyzer
     }
   end
 end
+
+random_revids = Array.new(500) { rand(1_000_000_000..2_000_000_000) }
+puts WikidataDiffAnalyzer.analyze(random_revids)[:total]
 
