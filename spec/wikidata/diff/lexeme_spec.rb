@@ -1,4 +1,4 @@
-require './lib/wikidata/diff/analyzer'
+require './lib/wikidata-diff-analyzer'
 require 'rspec'
 
 # testcases for lexeme

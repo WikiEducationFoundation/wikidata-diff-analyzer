@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require_relative "lib/wikidata/diff/analyzer/version"
+require File.expand_path('lib/wikidata-diff-analyzer/version', __dir__)
 
 Gem::Specification.new do |spec|
   spec.name = "wikidata-diff-analyzer"
-  spec.version = Wikidata::Diff::Analyzer::VERSION
+  spec.version = WikidataDiffAnalyzer::VERSION
   spec.authors = ["Sulagna Saha"]
   spec.email = ["saha23s@mtholyoke.edu"]
 
@@ -22,16 +22,22 @@ Gem::Specification.new do |spec|
 
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
-  spec.files = Dir.chdir(__dir__) do
-    `git ls-files -z`.split("\x0").reject do |f|
-      (File.expand_path(f) == __FILE__) || f.start_with?(*%w[bin/ test/ spec/ features/ .git .circleci appveyor])
-    end
-  end
+  spec.files = Dir['README.md', 'LICENSE',
+                   'CHANGELOG.md', 'lib/**/*.rb',
+                   'lib/**/*.rake',
+                   'wikidata-diff-analyzer.gemspec', '.github/*.md',
+                   'Gemfile', 'Rakefile']
+  spec.extra_rdoc_files = ['README.md']
+  spec.require_paths    = ['lib']
+
   spec.bindir = "exe"
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
-  spec.require_paths = ["lib"]
   spec.files.reject! { |f| File.extname(f) == '.gem' }
 
   # Adding the dependencies
   spec.add_dependency 'json', '~> 2.1'
+  spec.add_dependency 'mediawiki_api', '~> 0.7.0'
+  spec.add_dependency 'rspec', '~> 3.0'
+  spec.add_dependency 'rubocop', '~> 1.21'
+  spec.add_dependency 'rake', '~> 13.0'
 end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 # spec/wikidata/diff/analyzer_spec.rb
 
-require './lib/wikidata/diff/analyzer'
+require './lib/wikidata-diff-analyzer'
 require 'rspec'
 
 require_relative 'alias_spec'
