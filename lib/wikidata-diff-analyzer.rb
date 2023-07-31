@@ -1,7 +1,7 @@
 # frozen_string_literal: true
-require_relative 'large_batches_analyzer'
-require_relative 'revision_analyzer'
-require_relative 'total'
+require_relative 'wikidata/diff/large_batches_analyzer'
+require_relative 'wikidata/diff/revision_analyzer'
+require_relative 'wikidata/diff/total'
 
 module WikidataDiffAnalyzer
   class Error < StandardError; end

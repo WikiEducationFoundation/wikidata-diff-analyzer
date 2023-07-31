@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "wikidata/diff/analyzer"
+require "wikidata-diff-analyzer"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

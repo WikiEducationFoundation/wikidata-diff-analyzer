@@ -1,8 +1,4 @@
-module Wikidata
-  module Diff
-    module Analyzer
-      VERSION: String
-      # See the writing guide of rbs: https://github.com/ruby/rbs#guides
-    end
-  end
+module WikidataDiffAnalyzer
+    VERSION: String
+    # See the writing guide of rbs: https://github.com/ruby/rbs#guides
 end
