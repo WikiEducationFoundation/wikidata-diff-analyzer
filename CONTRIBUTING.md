@@ -1,3 +1,4 @@
+# File Structure
 This file contains information about file structures and how the gem works.
 
 `analyzer.rb` contains the main function `analyze` which calls functions from `large_batches_analyzer.rb`, `total.rb` and `revision_analyzer.rb`
@@ -11,3 +12,10 @@ This file contains information about file structures and how the gem works.
 `claim_analyzer.rb` calls `reference_analyzer` and `qualifier_analyzer`
 `form_analyzer.rb` calls `representation_analyzer` and `inside_claim_analyzer`
 `sense_analyzer.rb` calls `gloss_analyzer` and `inside_claim_analyzer`
+
+# Publication
+
+To publish the gem:
+1. Change the versioning number in lib/wikidata/diff/analyzer/version.rb file
+2. Run `gem build wikidata-diff-analyzer.gemspec`
+3. Run `gem push wikidata-diff-analyzer-{version number}.gem` (RubyGems.org credentials required)
