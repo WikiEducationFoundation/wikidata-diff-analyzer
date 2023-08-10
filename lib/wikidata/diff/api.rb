@@ -7,8 +7,6 @@ class Api
         client = MediawikiApi::Client.new(api_url)
 
         # remove duplicates if revision_ids exists
-        # check if duplicate revision_ids exist and print if exists
-
         revision_ids = revision_ids.uniq if revision_ids
 
         begin
@@ -40,13 +38,13 @@ class Api
               content_model = revision['slots']['main']['contentmodel']
               if content_model == 'wikibase-item' || content_model == 'wikibase-property' || content_model == 'wikibase-lexeme'
                 if revision.key?('texthidden')
-                  puts "Content has been hidden or deleted"
+                  # "Content has been hidden or deleted"
                   revid = revision['revid']
                   parentid = revision['parentid']
                   parsed_contents[revid] = { content: nil, comment: nil, parentid: parentid, model: content_model }
                 # checking if comment has been deleted
                 elsif revision.key?('commenthidden')
-                  puts "Comment has been hidden or deleted"
+                  # "Comment has been hidden or deleted"
                   revid = revision['revid']
                   content = revision['slots']['main']['*']
                   parentid = revision['parentid']
@@ -62,9 +60,7 @@ class Api
                     parsed_contents[revid] = { content: JSON.parse(content), comment: comment, parentid: parentid, model: content_model}
                   end
                 end
-              else
-                puts "Content model is #{content_model}"
-                puts "Revision id is #{revision['revid']}"
+              # in the other cases, the content model is wikitext, so we won't be handling those
               end
             end
           end
