@@ -11,3 +11,11 @@
 ## [2.0.0] 
 
 - Adding support for lexeme and property
+
+## [2.0.1]
+
+- Minor issue upgrade
+
+## [2.0.2]
+
+- Minor issue upgrade
