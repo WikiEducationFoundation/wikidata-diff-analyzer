@@ -1,49 +1,35 @@
+# frozen_string_literal: true
+
 class CommentAnalyzer
-    def self.isolate_comment_differences(comment)
+  def self.isolate_comment_differences(comment)
     phrases = {
-        'merge_to': 0,
-        'merge_from': 0,
-        'redirect': 0,
-        'undo': 0,
-        'restore': 0,
-        'clear_item': 0,
-        'create_item': 0,
+      'merge_to': 0,
+      'merge_from': 0,
+      'redirect': 0,
+      'undo': 0,
+      'restore': 0,
+      'clear_item': 0,
+      'create_item': 0
     }
 
-    if comment.nil?
-        return phrases
-    end
+    return phrases if comment.nil?
 
-    if comment.include?('wbmergeitems-from')
-        phrases[:merge_from] = 1
-    end
+    phrases[:merge_from] = 1 if comment.include?('wbmergeitems-from')
 
-    if comment.include?('wbmergeitems-to')
-        phrases[:merge_to] = 1
-    end
+    phrases[:merge_to] = 1 if comment.include?('wbmergeitems-to')
 
-    if comment.include?('wbcreateredirect')
-        phrases[:redirect] = 1
-    end
+    phrases[:redirect] = 1 if comment.include?('wbcreateredirect')
 
-    if comment.include?('undo:')
-        phrases[:undo] = 1
-    end
+    phrases[:undo] = 1 if comment.include?('undo:')
 
-    if comment.include?('restore:')
-        phrases[:restore] = 1
-    end
+    phrases[:restore] = 1 if comment.include?('restore:')
 
-    if comment.include?('wbeditentity-override')
-        phrases[:clear_item] = 1
-    end
+    phrases[:clear_item] = 1 if comment.include?('wbeditentity-override')
 
     # create-property, create-item, create-lexeme all includes this phrase
     # so based on content model in revision analyzer, it is decided which one it is
-    if comment.include?('wbeditentity-create')
-        phrases[:create_item] = 1
-    end
+    phrases[:create_item] = 1 if comment.include?('wbeditentity-create')
 
-    return phrases
-    end
+    phrases
+  end
 end
