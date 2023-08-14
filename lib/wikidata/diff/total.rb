@@ -1,56 +1,61 @@
 class Total
+    KEY_MAPPING = {
+        added_claims: :claims_added,
+        removed_claims: :claims_removed,
+        changed_claims: :claims_changed,
+        added_qualifiers: :qualifiers_added,
+        removed_qualifiers: :qualifiers_removed,
+        changed_qualifiers: :qualifiers_changed,
+        added_references: :references_added,
+        removed_references: :references_removed,
+        changed_references: :references_changed,
+        added_aliases: :aliases_added,
+        removed_aliases: :aliases_removed,
+        changed_aliases: :aliases_changed,
+        added_labels: :labels_added,
+        removed_labels: :labels_removed,
+        changed_labels: :labels_changed,
+        added_descriptions: :descriptions_added,
+        removed_descriptions: :descriptions_removed,
+        changed_descriptions: :descriptions_changed,
+        added_sitelinks: :sitelinks_added,
+        removed_sitelinks: :sitelinks_removed,
+        changed_sitelinks: :sitelinks_changed,
+        added_lemmas: :lemmas_added,
+        removed_lemmas: :lemmas_removed,
+        changed_lemmas: :lemmas_changed,
+        added_forms: :forms_added,
+        removed_forms: :forms_removed,
+        changed_forms: :forms_changed,
+        added_representations: :representations_added,
+        removed_representations: :representations_removed,
+        changed_representations: :representations_changed,
+        added_formclaims: :formclaims_added,
+        removed_formclaims: :formclaims_removed,
+        changed_formclaims: :formclaims_changed,
+        added_senses: :senses_added,
+        removed_senses: :senses_removed,
+        changed_senses: :senses_changed,
+        added_glosses: :glosses_added,
+        removed_glosses: :glosses_removed,
+        changed_glosses: :glosses_changed,
+        added_senseclaims: :senseclaims_added,
+        removed_senseclaims: :senseclaims_removed,
+        changed_senseclaims: :senseclaims_changed,
+        merge_from: :merge_from,
+        merge_to: :merge_to,
+        undo: :undo,
+        restore: :restore,
+        clear_item: :clear_item,
+        create_item: :create_item,
+        create_property: :create_property,
+        create_lexeme: :create_lexeme,
+        redirect: :redirect
+      }
+      
     def self.accumulate_totals(diff_data, total)
-        total[:claims_added] += diff_data[:added_claims]
-        total[:claims_removed] += diff_data[:removed_claims]
-        total[:claims_changed] += diff_data[:changed_claims]
-        total[:qualifiers_added] += diff_data[:added_qualifiers]
-        total[:qualifiers_removed] += diff_data[:removed_qualifiers]
-        total[:qualifiers_changed] += diff_data[:changed_qualifiers]
-        total[:references_added] += diff_data[:added_references]
-        total[:references_removed] += diff_data[:removed_references]
-        total[:references_changed] += diff_data[:changed_references]
-        total[:aliases_added] += diff_data[:added_aliases]
-        total[:aliases_removed] += diff_data[:removed_aliases]
-        total[:aliases_changed] += diff_data[:changed_aliases]
-        total[:labels_added] += diff_data[:added_labels]
-        total[:labels_removed] += diff_data[:removed_labels]
-        total[:labels_changed] += diff_data[:changed_labels]
-        total[:descriptions_added] += diff_data[:added_descriptions]
-        total[:descriptions_removed] += diff_data[:removed_descriptions]
-        total[:descriptions_changed] += diff_data[:changed_descriptions]
-        total[:sitelinks_added] += diff_data[:added_sitelinks]
-        total[:sitelinks_removed] += diff_data[:removed_sitelinks]
-        total[:sitelinks_changed] += diff_data[:changed_sitelinks]
-        total[:lemmas_added] += diff_data[:added_lemmas]
-        total[:lemmas_removed] += diff_data[:removed_lemmas]
-        total[:lemmas_changed] += diff_data[:changed_lemmas]
-        total[:forms_added] += diff_data[:added_forms]
-        total[:forms_removed] += diff_data[:removed_forms]
-        total[:forms_changed] += diff_data[:changed_forms]
-        total[:representations_added] += diff_data[:added_representations]
-        total[:representations_removed] += diff_data[:removed_representations]
-        total[:representations_changed] += diff_data[:changed_representations]
-        total[:formclaims_added] += diff_data[:added_formclaims]
-        total[:formclaims_removed] += diff_data[:removed_formclaims]
-        total[:formclaims_changed] += diff_data[:changed_formclaims]
-        total[:senses_added] += diff_data[:added_senses]
-        total[:senses_removed] += diff_data[:removed_senses]
-        total[:senses_changed] += diff_data[:changed_senses]
-        total[:glosses_added] += diff_data[:added_glosses]
-        total[:glosses_removed] += diff_data[:removed_glosses]
-        total[:glosses_changed] += diff_data[:changed_glosses]
-        total[:senseclaims_added] += diff_data[:added_senseclaims]
-        total[:senseclaims_removed] += diff_data[:removed_senseclaims]
-        total[:senseclaims_changed] += diff_data[:changed_senseclaims]
-        total[:merge_from] += diff_data[:merge_from]
-        total[:merge_to] += diff_data[:merge_to]
-        total[:undo] += diff_data[:undo]
-        total[:restore] += diff_data[:restore]
-        total[:clear_item] += diff_data[:clear_item]
-        total[:create_item] += diff_data[:create_item]
-        total[:create_property] += diff_data[:create_property]
-        total[:create_lexeme] += diff_data[:create_lexeme]
-        total[:redirect] += diff_data[:redirect]
-
+    KEY_MAPPING.each do |diff_key, total_key|
+        total[total_key] += diff_data[diff_key] if diff_data.has_key?(diff_key)
+    end
     end
 end
