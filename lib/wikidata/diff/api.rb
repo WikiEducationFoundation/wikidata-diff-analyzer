@@ -1,76 +1,75 @@
+# frozen_string_literal: true
+
 require 'json'
 require 'mediawiki_api'
 
 class Api
-    def self.get_revision_contents(revision_ids)
-        api_url = 'https://www.wikidata.org/w/api.php'
-        client = MediawikiApi::Client.new(api_url)
+  API_URL = 'https://www.wikidata.org/w/api.php'
 
-        # remove duplicates if revision_ids exists
-        revision_ids = revision_ids.uniq if revision_ids
+  def self.get_revision_contents(revision_ids)
+    revision_ids = revision_ids.uniq if revision_ids
+    client = MediawikiApi::Client.new(API_URL)
+    response = fetch_revision_data(client, revision_ids)
 
-        begin
-        response = client.action(
-            'query',
-            prop: 'revisions',
-            revids: revision_ids.join('|'),
-            rvslots: 'main',
-            rvprop: 'content|ids|comment',
-            format: 'json'
-        )
+    return {} if response.nil? || response.data['pages'].nil?
 
-        if response.nil?
-            return {}
-        end
+    parse_revisions(response.data['pages'])
+  rescue MediawikiApi::ApiError => e
+    puts "Error retrieving revision content: #{e.message}"
+    {}
+  rescue JSON::ParserError => e
+    puts "Error parsing JSON content: #{e.message}"
+    raise e
+  end
 
-        parsed_contents = {}
+  def self.fetch_revision_data(client, revision_ids)
+    client.action(
+      'query',
+      prop: 'revisions',
+      revids: revision_ids&.join('|'),
+      rvslots: 'main',
+      rvprop: 'content|ids|comment',
+      format: 'json'
+    )
+  end
 
-        # checks if it has pages
-        if response.data['pages'].nil?
-            return nil
-        end
+  def self.parse_revisions(pages)
+    parsed_contents = {}
 
-        response.data['pages'].keys.each do |page|
-            page = response.data['pages'][page]
-            revisions = page['revisions']
-          
-            revisions.each do |revision|
-              content_model = revision['slots']['main']['contentmodel']
-              if content_model == 'wikibase-item' || content_model == 'wikibase-property' || content_model == 'wikibase-lexeme'
-                if revision.key?('texthidden')
-                  # "Content has been hidden or deleted"
-                  revid = revision['revid']
-                  parentid = revision['parentid']
-                  parsed_contents[revid] = { content: nil, comment: nil, parentid: parentid, model: content_model }
-                # checking if comment has been deleted
-                elsif revision.key?('commenthidden')
-                  # "Comment has been hidden or deleted"
-                  revid = revision['revid']
-                  content = revision['slots']['main']['*']
-                  parentid = revision['parentid']
-                  parsed_contents[revid] = { content: JSON.parse(content), comment: nil, parentid: parentid, model: content_model }
-                else
-                  content = revision['slots']['main']['*']
-                  revid = revision['revid']
-                  comment = revision['comment']
-                  parentid = revision['parentid']
-                  if revid == 0 || revid.nil?
-                    parsed_contents[revid] = { content: nil, comment: nil, parentid: nil, model: 'wikibase-item' }
-                  else
-                    parsed_contents[revid] = { content: JSON.parse(content), comment: comment, parentid: parentid, model: content_model}
-                  end
-                end
-              # in the other cases, the content model is wikitext, so we won't be handling those
-              end
-            end
-          end
-        return parsed_contents
-        rescue MediawikiApi::ApiError => e
-        puts "Error retrieving revision content: #{e.message}"
-        return {}
-        rescue JSON::ParserError => e
-        puts "Error parsing JSON content: #{e.message}"
-        raise e
-        end
+    pages.each_key do |page|
+      revisions = pages[page]['revisions']
+
+      revisions.each do |revision|
+        parsed_content = parse_revision(revision)
+        parsed_contents[revision['revid']] = parsed_content if parsed_content
+      end
+    end
+
+    parsed_contents
+  end
+
+  def self.parse_revision(revision)
+    content_model = revision['slots']['main']['contentmodel']
+
+    return nil unless %w[wikibase-item wikibase-property wikibase-lexeme].include?(content_model)
+
+    revid = revision['revid']
+    parentid = revision['parentid']
+
+    if revision.key?('texthidden')
+      { content: nil, comment: nil, parentid: parentid, model: content_model }
+    elsif revision.key?('commenthidden')
+      content = revision['slots']['main']['*']
+      { content: JSON.parse(content), comment: nil, parentid: parentid, model: content_model }
+    else
+      content = revision['slots']['main']['*']
+      comment = revision['comment']
+
+      if revid.nil? || revid.zero?
+        { content: nil, comment: nil, parentid: nil, model: 'wikibase-item' }
+      else
+        { content: JSON.parse(content), comment: comment, parentid: parentid, model: content_model }
+      end
     end
   end
+end

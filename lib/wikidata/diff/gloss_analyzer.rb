@@ -1,71 +1,66 @@
+# frozen_string_literal: true
+
 class GlossAnalyzer
-    def self.isolate_gloss_differences(current_content, parent_content)
-        return {
+  def self.isolate_gloss_differences(current_content, parent_content)
+    if current_content.nil? && parent_content.nil?
+      return {
         changed: [],
         removed: [],
         added: []
-        } if current_content.nil? && parent_content.nil?
-    
-        if current_content
-            current_glosses = current_content['glosses']
-            if current_glosses.nil? || current_glosses.is_a?(Array)
-                current_glosses = {}
-            end
-        else
-            current_glosses = {}
-        end
+      }
+    end
 
-        if parent_content
-            parent_glosses = parent_content['glosses'] 
-            if parent_glosses.nil? || parent_glosses.is_a?(Array)
-                parent_glosses = {}
-            end
-        else
-            parent_glosses = {}
-        end
+    if current_content
+      current_glosses = current_content['glosses']
+      current_glosses = {} if current_glosses.nil? || current_glosses.is_a?(Array)
+    else
+      current_glosses = {}
+    end
 
+    if parent_content
+      parent_glosses = parent_content['glosses']
+      parent_glosses = {} if parent_glosses.nil? || parent_glosses.is_a?(Array)
+    else
+      parent_glosses = {}
+    end
 
+    changed = []
+    removed = []
+    added = []
 
-        changed = []
-        removed = []
-        added = []
-
-        # if parentid is 0, then add all labels as added and return it
-        if parent_content.nil?
-            current_glosses.each do |lang, label|
-                added << { lang: lang }
-            end
-            return {
-                changed: changed,
-                removed: removed,
-                added: added
-            }
-        else
-
-        
-            # Iterate over each language in the current labels
-            (current_glosses || {}).each do |lang, current_gloss|
-                parent_gloss = parent_glosses[lang]
-            
-                if parent_gloss.nil?
-                    added << { lang: lang }
-                elsif current_gloss != parent_gloss
-                    changed << { lang: lang }
-                end
-            end
-            
-                # Iterate over each language in the parent labels to find removed labels
-            (parent_glosses || {}).each do |lang, parent_gloss|
-                if current_glosses[lang].nil?
-                    removed << { lang: lang }
-                end
-            end
-        end
-    
-        {
+    # if parentid is 0, then add all labels as added and return it
+    if parent_content.nil?
+      current_glosses.each do |lang, _label|
+        added << { lang: lang }
+      end
+      return {
         changed: changed,
         removed: removed,
         added: added
-        }
+      }
+    else
+
+      # Iterate over each language in the current labels
+      (current_glosses || {}).each do |lang, current_gloss|
+        parent_gloss = parent_glosses[lang]
+
+        if parent_gloss.nil?
+          added << { lang: lang }
+        elsif current_gloss != parent_gloss
+          changed << { lang: lang }
+        end
+      end
+
+      # Iterate over each language in the parent labels to find removed labels
+      (parent_glosses || {}).each do |lang, _parent_gloss|
+        removed << { lang: lang } if current_glosses[lang].nil?
+      end
     end
+
+    {
+      changed: changed,
+      removed: removed,
+      added: added
+    }
+  end
 end

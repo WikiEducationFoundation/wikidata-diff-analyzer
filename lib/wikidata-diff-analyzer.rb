@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require_relative 'wikidata/diff/large_batches_analyzer'
 require_relative 'wikidata/diff/revision_analyzer'
 require_relative 'wikidata/diff/total'
@@ -76,13 +77,13 @@ module WikidataDiffAnalyzer
 
     result.each do |revision_id, revision_data|
       current_content = revision_data[:current_content]
-      if current_content
-        diff = RevisionAnalyzer.analyze_diff(revision_data)
-        diffs[revision_id] = diff
-        Total.accumulate_totals(diff, total)
-        diffs_analyzed << revision_id
-        diffs_analyzed_count += 1
-      end
+      next unless current_content
+
+      diff = RevisionAnalyzer.analyze_diff(revision_data)
+      diffs[revision_id] = diff
+      Total.accumulate_totals(diff, total)
+      diffs_analyzed << revision_id
+      diffs_analyzed_count += 1
     end
 
     # adding the bad rev_ids to the not_analyzed list
