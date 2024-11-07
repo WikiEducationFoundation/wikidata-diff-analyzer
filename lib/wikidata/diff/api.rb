@@ -39,6 +39,9 @@ class Api
     pages.each_key do |page|
       revisions = pages[page]['revisions']
 
+      # Some API responses may include a `page` entry without a 'revisions' property.
+      # To handle this, skip the iteration if `revisions` is nil or false, ensuring that
+      # pages without revisions do not cause errors during processing.
       next unless revisions
 
       revisions.each do |revision|
