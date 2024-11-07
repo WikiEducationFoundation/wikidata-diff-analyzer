@@ -39,6 +39,8 @@ class Api
     pages.each_key do |page|
       revisions = pages[page]['revisions']
 
+      next unless revisions
+
       revisions.each do |revision|
         parsed_content = parse_revision(revision)
         parsed_contents[revision['revid']] = parsed_content if parsed_content
