@@ -35,24 +35,24 @@ class Api
 
   def self.parse_revisions(pages)
     parsed_contents = {}
-  
+
     pages.each_key do |page|
       revisions = pages[page]['revisions']
-  
-      # The MediaWiki API responses may sometimes get truncated, causing the `revisions` 
-      # property of some pages to be omitted. As a temporary workaround, the guard statement below skips pages that appear 
+
+      # The MediaWiki API responses may sometimes get truncated, causing the `revisions`
+      # property of some pages to be omitted. As a temporary workaround, the guard statement below skips pages that appear
       # to have no revisions (`revisions` is nil or false) to prevent errors during processing.
       next unless revisions
-  
+
       revisions.each do |revision|
         parsed_content = parse_revision(revision)
         parsed_contents[revision['revid']] = parsed_content if parsed_content
       end
     end
-  
+
     parsed_contents
   end
-  
+
   def self.parse_revision(revision)
     content_model = revision['slots']['main']['contentmodel']
 
