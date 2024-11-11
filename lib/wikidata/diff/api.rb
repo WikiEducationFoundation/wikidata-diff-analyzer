@@ -2,18 +2,18 @@
 
 require 'json'
 require 'mediawiki_api'
+require 'deep_merge'
 
 class Api
   API_URL = 'https://www.wikidata.org/w/api.php'
 
   def self.get_revision_contents(revision_ids)
     revision_ids = revision_ids.uniq if revision_ids
-    client = MediawikiApi::Client.new(API_URL)
-    response = fetch_revision_data(client, revision_ids)
+    response = fetch_revision_data(revision_ids)
 
-    return {} if response.nil? || response.data['pages'].nil?
+    return {} if response.nil? || response['pages'].nil?
 
-    parse_revisions(response.data['pages'])
+    parse_revisions(response['pages'])
   rescue MediawikiApi::ApiError => e
     puts "Error retrieving revision content: #{e.message}"
     {}
@@ -22,15 +22,52 @@ class Api
     raise e
   end
 
-  def self.fetch_revision_data(client, revision_ids)
-    client.action(
-      'query',
+  def self.fetch_revision_data(revision_ids)
+    query_parameters = {
       prop: 'revisions',
       revids: revision_ids&.join('|'),
       rvslots: 'main',
       rvprop: 'content|ids|comment',
       format: 'json'
-    )
+    }
+    fetch_all_revisions(query_parameters)
+  end
+
+  def self.fetch_all_revisions(query)
+    client = api_client
+    data = {}
+    continue_param = nil
+
+    loop do
+      query.merge!(continue_param) if continue_param
+      response = mediawiki_request(client, 'query', query)
+      break unless response
+
+      data.deep_merge!(response.data)
+      continue_param = response['continue']
+      break if continue_param.nil?
+    end
+
+    data
+  end
+
+  def self.mediawiki_request(client, action, query)
+    tries ||= 3
+    client.send(action, query)
+  rescue StandardError => e
+    tries -= 1
+    sleep 1 if too_many_requests?(e)
+    retry unless tries.zero?
+    log_error(e)
+    nil
+  end
+
+  def self.api_client
+    MediawikiApi::Client.new(API_URL)
+  end
+
+  def self.too_many_requests?(error)
+    error.is_a?(MediawikiApi::HttpError) && error.status == 429
   end
 
   def self.parse_revisions(pages)

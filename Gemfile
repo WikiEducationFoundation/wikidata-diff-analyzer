@@ -14,3 +14,5 @@ gem 'rubocop', '~> 1.21'
 gem 'mediawiki_api'
 
 gem 'json'
+
+gem 'deep_merge'
