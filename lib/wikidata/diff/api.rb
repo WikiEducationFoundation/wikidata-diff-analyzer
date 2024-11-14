@@ -2,7 +2,6 @@
 
 require 'json'
 require 'mediawiki_api'
-require 'deep_merge'
 
 class Api
   API_URL = 'https://www.wikidata.org/w/api.php'
@@ -43,12 +42,28 @@ class Api
       response = mediawiki_request(client, 'query', query)
       break unless response
 
-      data.deep_merge!(response.data)
+      merge_page_data(data, response.data['pages'])
+
       continue_param = response['continue']
-      break if continue_param.nil?
+      break unless continue_param
     end
 
     data
+  end
+
+  def self.merge_page_data(data, pages)
+    pages.each do |pageid, page_data|
+      if data['pages'] && data['pages'][pageid]
+        existing_page_data = data['pages'][pageid]
+
+        existing_page_data.merge!(page_data) do |key, old_val, new_val|
+          key == 'revisions' && old_val.is_a?(Array) && new_val.is_a?(Array) ? old_val + new_val : new_val
+        end
+      else
+        data['pages'] ||= {}
+        data['pages'][pageid] = page_data
+      end
+    end
   end
 
   def self.mediawiki_request(client, action, query)
@@ -58,8 +73,7 @@ class Api
     tries -= 1
     sleep 1 if too_many_requests?(e)
     retry unless tries.zero?
-    log_error(e)
-    nil
+    raise(e)
   end
 
   def self.api_client
