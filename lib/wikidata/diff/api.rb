@@ -52,6 +52,8 @@ class Api
   end
 
   def self.merge_page_data(data, pages)
+    return unless pages
+
     pages.each do |pageid, page_data|
       if data['pages'] && data['pages'][pageid]
         existing_page_data = data['pages'][pageid]
