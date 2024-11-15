@@ -19,3 +19,7 @@
 ## [2.0.2]
 
 - Minor issue upgrade
+
+## [2.0.3]
+
+- Add handling for queries that hit the MediaWiki response limit
