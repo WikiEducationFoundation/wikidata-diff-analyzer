@@ -8,7 +8,7 @@ class Api
 
   def self.get_revision_contents(revision_ids)
     revision_ids = revision_ids.uniq if revision_ids
-    response = fetch_revision_data(revision_ids)
+    response = fetch_all_revisions(revision_ids)
 
     return {} if response.nil? || response['pages'].nil?
 
@@ -21,18 +21,18 @@ class Api
     raise e
   end
 
-  def self.fetch_revision_data(revision_ids)
-    query_parameters = {
+  def self.get_query_parameters(revision_ids)
+    {
       prop: 'revisions',
       revids: revision_ids&.join('|'),
       rvslots: 'main',
       rvprop: 'content|ids|comment',
       format: 'json'
     }
-    fetch_all_revisions(query_parameters)
   end
 
-  def self.fetch_all_revisions(query)
+  def self.fetch_all_revisions(revision_ids)
+    query = get_query_parameters(revision_ids)
     client = api_client
     data = {}
     continue_param = nil
