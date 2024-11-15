@@ -17,26 +17,31 @@ RSpec.describe Api do
         ]
       end
 
-      it 'returns without raising an error and parses all revision ids passed into it' do
+      it 'returns a truncation warning since query exceeds response size limit' do
+        API_URL = 'https://www.wikidata.org/w/api.php'
+        client = MediawikiApi::Client.new(API_URL)
+
+        query_parameters = {
+          prop: 'revisions',
+          revids: revision_ids&.join('|'),
+          rvslots: 'main',
+          rvprop: 'content|ids|comment',
+          format: 'json'
+      }
+        response = client.send('query', query_parameters)
+
+        expect(response['warnings']).not_to be_nil
+        expect(response['warnings']['result']['*']).to include(
+          "This result was truncated because it would otherwise be larger than the limit of 12,582,912 bytes."
+        )
+      end
+
+      it 'returns the correct result and handles the warning' do
         @result = Api.get_revision_contents(revision_ids)
+        
         expect {@result}.not_to raise_error
-  
         expect(@result).to be_a(Hash)
-
         expect(@result.size).to eq(25)
-
       end
-
-      it 'returns a truncation warning if query exceeds response size limit' do
-        result = Api.fetch_revision_data(revision_ids)
-  
-        if result['warnings']
-          expect(result['warnings']['result']['*']).to include(
-            "This result was truncated because it would otherwise be larger than the limit of 12,582,912 bytes.")
-        else
-          expect(result).not_to be_nil
-        end
-      end
-
   end
 end
